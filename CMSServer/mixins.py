@@ -1,7 +1,7 @@
 from django.core.exceptions import PermissionDenied
 from django.utils.translation import gettext_lazy as _
 from .permissions import can_edit_post, can_add_post
-from .utils import filter_posts_by_blog
+from .utils import filter_posts_by_blog, authenticate_user, create_user_token, delete_user_token
 
 
 class PostReadonlyFieldsMixin:
@@ -89,3 +89,17 @@ class FilterPostsByBlogViewSetMixin:
         qs = super().get_queryset()
         blog_id = self.request.query_params.get('blog_id')
         return filter_posts_by_blog(qs, blog_id)
+
+class AuthenticationMixin:
+    
+    def authenticate_user(self, username: str, password: str):
+        user = authenticate_user(username, password)
+        if not user:
+            raise PermissionDenied("Invalid credentials")
+        return user
+    
+    def create_user_token(self, user):
+        return create_user_token(user)
+    
+    def delete_user_token(self, user):
+        return delete_user_token(user)
