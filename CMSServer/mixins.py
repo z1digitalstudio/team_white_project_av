@@ -11,6 +11,18 @@ class PostReadonlyFieldsMixin:
             ro.append('blog')
         return ro
 
+class PublicReadOnlyMixin:
+    
+    def get_permissions(self):
+       
+        if self.action == 'list' or self.action == 'retrieve':
+            from rest_framework import permissions
+            permission_classes = [permissions.AllowAny]
+        else:
+            from rest_framework import permissions
+            permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
 class LimitBlogChoicesToOwnerMixin:
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         formfield = super().formfield_for_foreignkey(db_field, request, **kwargs)
@@ -18,6 +30,30 @@ class LimitBlogChoicesToOwnerMixin:
             if formfield is not None and hasattr(formfield, 'queryset'):
                 formfield.queryset = formfield.queryset.filter(user=request.user)
         return formfield
+
+class BlogOwnerPermissionMixin:
+    
+    def get_permissions(self):
+        from rest_framework import permissions
+        
+        if self.action == 'list' or self.action == 'retrieve':
+            permission_classes = [permissions.AllowAny]
+        else:
+            permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
+    
+    def perform_update(self, serializer):
+        blog = self.get_object()
+        if blog.user != self.request.user and not self.request.user.is_superuser:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Only the owner of the blog can edit it")
+        serializer.save()
+    
+    def perform_destroy(self, instance):
+        if instance.user != self.request.user and not self.request.user.is_superuser:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Only the owner of the blog can delete it")
+        instance.delete()
 
 class PostOwnerQuerysetAdminMixin:
     def get_queryset(self, request):

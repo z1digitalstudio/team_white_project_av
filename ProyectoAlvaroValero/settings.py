@@ -45,13 +45,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'CMSServer',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -82,6 +82,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',  
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 WSGI_APPLICATION = 'ProyectoAlvaroValero.wsgi.application'
@@ -144,6 +145,28 @@ TINYMCE_DEFAULT_CONFIG = {
     'statusbar': True,
 }
 
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'CMS Server API',
+    'DESCRIPTION': 'API for blog, post and tag management with token authentication',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SCHEMA_PATH_PREFIX': '/cms/',
+    'TAGS': [
+        {'name': 'Authentication', 'description': 'Authentication endpoints'},
+        {'name': 'Blogs', 'description': 'Blog management'},
+        {'name': 'Posts', 'description': 'Post management'},
+        {'name': 'Tags', 'description': 'Tag management'},
+    ],
+    'SECURITY_DEFINITIONS': {
+        'Token': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization',
+            'description': 'Authentication token. Format: Token <your_token>'
+        }
+    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
@@ -181,3 +204,4 @@ IMPORT_EXPORT_SKIP_ADMIN_LOG = False
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+

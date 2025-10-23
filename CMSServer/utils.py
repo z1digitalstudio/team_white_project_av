@@ -4,6 +4,9 @@ from django.db.models import QuerySet
 from CMSServer.models import Blog, Post
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
+import logging
+
+logger = logging.getLogger(__name__)
 
 def is_superuser(user: Optional[User]) -> bool:
     return bool(user and getattr(user, "is_superuser", False))
@@ -38,5 +41,9 @@ def delete_user_token(user: User) -> bool:
     try:
         user.auth_token.delete()
         return True
-    except:
+    except Token.DoesNotExist:
         return False
+    except Exception as e:
+        logger.error(f"Error deleting token: {e}")
+        return False
+
