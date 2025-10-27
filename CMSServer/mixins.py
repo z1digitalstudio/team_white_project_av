@@ -2,7 +2,7 @@ from django.core.exceptions import PermissionDenied
 from django.utils.translation import gettext_lazy as _
 from .permissions import can_edit_post, can_add_post
 from .utils import filter_posts_by_blog, authenticate_user, create_user_token, delete_user_token
-
+from .exceptions import AuthenticationError, InvalidCredentialsError
 
 class PostReadonlyFieldsMixin:
     def get_readonly_fields(self, request, obj=None):
@@ -91,7 +91,7 @@ class PostEditorMixin:
 
     def perform_create(self, serializer):
         if not self.request.user.is_authenticated:
-            raise PermissionDenied(_("Authentication required to create posts."))
+                raise AuthenticationError(_("Authentication required to create posts."))
         
         if not hasattr(self.request.user, 'blog'):
             from .models import Blog
@@ -106,7 +106,7 @@ class PostEditorMixin:
 
     def perform_update(self, serializer):
         if not self.request.user.is_authenticated:
-            raise PermissionDenied(_("Authentication required to edit posts."))
+            raise AuthenticationError(_("Authentication required to edit posts."))
         
         if not can_edit_post(self.request.user, self.get_object()):
             raise PermissionDenied(_("You are not allowed to edit this post."))
@@ -114,7 +114,7 @@ class PostEditorMixin:
 
     def perform_destroy(self, instance):
         if not self.request.user.is_authenticated:
-            raise PermissionDenied(_("Authentication required to delete posts."))
+            raise AuthenticationError(_("Authentication required to delete posts."))
         
         if not can_edit_post(self.request.user, instance):
             raise PermissionDenied(_("You are not allowed to delete this post."))
@@ -131,7 +131,7 @@ class AuthenticationMixin:
     def authenticate_user(self, username: str, password: str):
         user = authenticate_user(username, password)
         if not user:
-            raise PermissionDenied("Invalid credentials")
+            raise InvalidCredentialsError("Invalid credentials")
         return user
     
     def create_user_token(self, user):

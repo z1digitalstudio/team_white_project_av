@@ -1,11 +1,12 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from .models import Blog, Post, Tag
 from django.contrib.auth.models import User
 from .utils import authenticate_user
-
+from .exceptions import InvalidCredentialsError
 from drf_spectacular.utils import extend_schema_serializer
-from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.openapi import OpenApiExample
+
 
 @extend_schema_serializer(
     examples=[
@@ -54,7 +55,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         password = attrs.get('password')
         password_confirm = attrs.get('password_confirm')
         if password != password_confirm:
-            raise serializers.ValidationError('Passwords do not match')
+            raise ValidationError('Passwords do not match')
         return attrs
 
     def create(self, validated_data):
@@ -87,10 +88,10 @@ class LoginSerializer(serializers.Serializer):
         if username and password:
             user = authenticate_user(username, password)
             if not user:
-                raise serializers.ValidationError('Invalid credentials')
+                    raise InvalidCredentialsError()
             attrs['user'] = user
         else:
-            raise serializers.ValidationError('Must provide username and password')
+            raise ValidationError('Must provide username and password')
         return attrs
 
 @extend_schema_serializer(
@@ -172,3 +173,4 @@ class BlogSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
         return super().create(validated_data)
+
