@@ -27,6 +27,7 @@ venv/
 ENV/
 env/
 venv.bak/
+.env
 
 # Django
 db.sqlite3

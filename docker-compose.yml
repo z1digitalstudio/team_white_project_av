@@ -1,20 +1,41 @@
+version: "3.9"
+
 services:
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
-    volumes:
-      - .:/app
-      - ./db.sqlite3:/app/db.sqlite3
     ports:
       - "8000:8000"
+    env_file: .env
     environment:
-      - DEBUG=1
-      - SECRET_KEY=k%amu!l%due_2t1_mbg57(0ivzdz4$680xy6lttxof(g&f09$u
-      - DATABASE_URL=sqlite:///db.sqlite3
+      - DJANGO_SETTINGS_MODULE=ProyectoAlvaroValero.settings
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
     restart: unless-stopped
+    depends_on:
+      - db
+    networks:
+      - app-network
+    user: "1000:1000"
 
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-cms_db}
+      POSTGRES_USER: ${POSTGRES_USER:-cms_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
+    networks:
+      - app-network
+    user: "999:999"
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+
+networks:
+  app-network:
+    driver: bridge
