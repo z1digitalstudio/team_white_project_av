@@ -45,6 +45,10 @@ COPY --from=builder /root/.local /home/django/.local
 # Copy application code
 COPY --chown=django:django . .
 
+# Set ownership and permissions for application code
+RUN chown -R django:django /app && \
+    chmod -R 755 /app
+
 # Switch to non-root user
 USER django
 
