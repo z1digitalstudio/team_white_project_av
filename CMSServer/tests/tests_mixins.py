@@ -14,6 +14,7 @@ from CMSServer.mixins import (
 from CMSServer.tests.factories import UserFactory, BlogFactory, PostFactory, TagFactory
 from CMSServer.models import Blog, Post, Tag
 from django.test import RequestFactory
+from CMSServer.exceptions import InvalidCredentialsError, AuthenticationError
 
 
 class MockAdmin:
@@ -288,9 +289,9 @@ class TestAuthenticationMixin(TestCase):
     def test_authenticate_user_failure(self, mock_authenticate):
         mock_authenticate.return_value = None
         
-        with self.assertRaises(DjangoPermissionDenied):
+        with self.assertRaises(InvalidCredentialsError):
             self.mixin.authenticate_user('username', 'wrong_password')
-    
+        
     @patch('CMSServer.mixins.create_user_token')
     def test_create_user_token(self, mock_create_token):
         mock_create_token.return_value = 'test_token'
@@ -355,7 +356,7 @@ class TestPostEditorMixin(APITestCase):
         
         serializer = Mock()
         
-        with self.assertRaises(DjangoPermissionDenied):
+        with self.assertRaises(AuthenticationError):
             mixin.perform_create(serializer)
     
     @patch('CMSServer.mixins.can_edit_post')
