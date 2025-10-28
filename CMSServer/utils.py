@@ -1,21 +1,24 @@
 from typing import Optional
 from django.contrib.auth.models import User
-from django.db.models import QuerySet
-from CMSServer.models import Blog, Post
+from CMSServer.models import Blog
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 import logging
 
 logger = logging.getLogger(__name__)
 
+
 def is_superuser(user: Optional[User]) -> bool:
     return bool(user and getattr(user, "is_superuser", False))
+
 
 def get_blog_owner(blog: Blog) -> Optional[User]:
     return getattr(blog, "user", None)
 
+
 def is_blog_owner(user: Optional[User], blog: Blog) -> bool:
     return bool(user and user == get_blog_owner(blog))
+
 
 def filter_posts_by_blog(queryset, blog_id):
     if blog_id:
@@ -33,9 +36,11 @@ def authenticate_user(username: str, password: str) -> Optional[User]:
         return user
     return None
 
+
 def create_user_token(user: User) -> str:
     token = Token.objects.get_or_create(user=user)[0]
     return token.key
+
 
 def delete_user_token(user: User) -> bool:
     try:
@@ -46,4 +51,3 @@ def delete_user_token(user: User) -> bool:
     except Exception as e:
         logger.error(f"Error deleting token: {e}")
         return False
-

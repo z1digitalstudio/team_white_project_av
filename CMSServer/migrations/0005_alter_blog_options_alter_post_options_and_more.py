@@ -8,55 +8,102 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('CMSServer', '0004_blog_user'),
+        ("CMSServer", "0004_blog_user"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='blog',
-            options={'ordering': ['-created_at'], 'verbose_name': 'Blog', 'verbose_name_plural': 'Blogs'},
+            name="blog",
+            options={
+                "ordering": ["-created_at"],
+                "verbose_name": "Blog",
+                "verbose_name_plural": "Blogs",
+            },
         ),
         migrations.AlterModelOptions(
-            name='post',
-            options={'ordering': ['-published_at'], 'verbose_name': 'Post', 'verbose_name_plural': 'Posts'},
+            name="post",
+            options={
+                "ordering": ["-published_at"],
+                "verbose_name": "Post",
+                "verbose_name_plural": "Posts",
+            },
         ),
         migrations.AlterModelOptions(
-            name='tag',
-            options={'ordering': ['name'], 'verbose_name': 'Tag', 'verbose_name_plural': 'Tags'},
+            name="tag",
+            options={
+                "ordering": ["name"],
+                "verbose_name": "Tag",
+                "verbose_name_plural": "Tags",
+            },
         ),
         migrations.AddField(
-            model_name='post',
-            name='excerpt',
-            field=models.TextField(blank=True, help_text='Post excerpt (optional)', max_length=500),
+            model_name="post",
+            name="excerpt",
+            field=models.TextField(
+                blank=True, help_text="Post excerpt (optional)", max_length=500
+            ),
         ),
         migrations.AlterField(
-            model_name='blog',
-            name='description',
-            field=tinymce.models.HTMLField(help_text='Blog description'),
+            model_name="blog",
+            name="description",
+            field=tinymce.models.HTMLField(help_text="Blog description"),
         ),
         migrations.AlterField(
-            model_name='blog',
-            name='title',
-            field=models.CharField(help_text='Blog title (minimum 3 characters)', max_length=200, validators=[django.core.validators.MinLengthValidator(3, message='Blog title must be at least 3 characters long'), django.core.validators.RegexValidator(message='Blog title contains invalid characters', regex='^[a-zA-Z0-9\\s\\-_áéíóúñÁÉÍÓÚÑ]+$')]),
+            model_name="blog",
+            name="title",
+            field=models.CharField(
+                help_text="Blog title (minimum 3 characters)",
+                max_length=200,
+                validators=[
+                    django.core.validators.MinLengthValidator(
+                        3, message="Blog title must be at least 3 characters long"
+                    ),
+                    django.core.validators.RegexValidator(
+                        message="Blog title contains invalid characters",
+                        regex="^[a-zA-Z0-9\\s\\-_áéíóúñÁÉÍÓÚÑ]+$",
+                    ),
+                ],
+            ),
         ),
         migrations.AlterField(
-            model_name='post',
-            name='content',
-            field=tinymce.models.HTMLField(help_text='Post content'),
+            model_name="post",
+            name="content",
+            field=tinymce.models.HTMLField(help_text="Post content"),
         ),
         migrations.AlterField(
-            model_name='post',
-            name='title',
-            field=models.CharField(max_length=200, validators=[django.core.validators.MinLengthValidator(5, message='Post title must be at least 5 characters long')]),
+            model_name="post",
+            name="title",
+            field=models.CharField(
+                max_length=200,
+                validators=[
+                    django.core.validators.MinLengthValidator(
+                        5, message="Post title must be at least 5 characters long"
+                    )
+                ],
+            ),
         ),
         migrations.AlterField(
-            model_name='tag',
-            name='name',
-            field=models.CharField(help_text='Tag name (minimum 2 characters)', max_length=50, validators=[django.core.validators.MinLengthValidator(2, message='Tag name must be at least 2 characters long'), django.core.validators.RegexValidator(message='Tag name contains invalid characters', regex='^[a-zA-Z0-9\\s\\-_áéíóúñÁÉÍÓÚÑ]+$')]),
+            model_name="tag",
+            name="name",
+            field=models.CharField(
+                help_text="Tag name (minimum 2 characters)",
+                max_length=50,
+                validators=[
+                    django.core.validators.MinLengthValidator(
+                        2, message="Tag name must be at least 2 characters long"
+                    ),
+                    django.core.validators.RegexValidator(
+                        message="Tag name contains invalid characters",
+                        regex="^[a-zA-Z0-9\\s\\-_áéíóúñÁÉÍÓÚÑ]+$",
+                    ),
+                ],
+            ),
         ),
         migrations.AlterField(
-            model_name='tag',
-            name='posts',
-            field=models.ManyToManyField(blank=True, related_name='tags', to='CMSServer.post'),
+            model_name="tag",
+            name="posts",
+            field=models.ManyToManyField(
+                blank=True, related_name="tags", to="CMSServer.post"
+            ),
         ),
     ]

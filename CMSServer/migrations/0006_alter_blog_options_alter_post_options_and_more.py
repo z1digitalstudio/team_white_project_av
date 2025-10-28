@@ -7,54 +7,54 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('CMSServer', '0005_alter_blog_options_alter_post_options_and_more'),
+        ("CMSServer", "0005_alter_blog_options_alter_post_options_and_more"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='blog',
+            name="blog",
             options={},
         ),
         migrations.AlterModelOptions(
-            name='post',
+            name="post",
             options={},
         ),
         migrations.AlterModelOptions(
-            name='tag',
+            name="tag",
             options={},
         ),
         migrations.RemoveField(
-            model_name='post',
-            name='excerpt',
+            model_name="post",
+            name="excerpt",
         ),
         migrations.AlterField(
-            model_name='blog',
-            name='description',
+            model_name="blog",
+            name="description",
             field=tinymce.models.HTMLField(),
         ),
         migrations.AlterField(
-            model_name='blog',
-            name='title',
+            model_name="blog",
+            name="title",
             field=models.CharField(max_length=200),
         ),
         migrations.AlterField(
-            model_name='post',
-            name='content',
+            model_name="post",
+            name="content",
             field=tinymce.models.HTMLField(),
         ),
         migrations.AlterField(
-            model_name='post',
-            name='title',
+            model_name="post",
+            name="title",
             field=models.CharField(max_length=200),
         ),
         migrations.AlterField(
-            model_name='tag',
-            name='name',
+            model_name="tag",
+            name="name",
             field=models.CharField(max_length=200),
         ),
         migrations.AlterField(
-            model_name='tag',
-            name='posts',
-            field=models.ManyToManyField(related_name='tags', to='CMSServer.post'),
+            model_name="tag",
+            name="posts",
+            field=models.ManyToManyField(related_name="tags", to="CMSServer.post"),
         ),
     ]

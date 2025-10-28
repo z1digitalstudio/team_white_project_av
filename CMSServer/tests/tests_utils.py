@@ -1,8 +1,17 @@
 from django.test import TestCase
-from CMSServer.tests.factories import UserFactory, BlogFactory, PostFactory, TagFactory
-from CMSServer.utils import is_superuser, get_blog_owner, is_blog_owner, filter_posts_by_blog, authenticate_user, create_user_token, delete_user_token
+from CMSServer.tests.factories import UserFactory, BlogFactory, PostFactory
+from CMSServer.utils import (
+    is_superuser,
+    get_blog_owner,
+    is_blog_owner,
+    filter_posts_by_blog,
+    authenticate_user,
+    create_user_token,
+    delete_user_token,
+)
 from CMSServer.models import Post
 from rest_framework.authtoken.models import Token
+
 
 class TestUtils(TestCase):
     def test_is_superuser(self):
@@ -16,13 +25,13 @@ class TestUtils(TestCase):
     def test_is_blog_owner(self):
         user = UserFactory()
         blog = BlogFactory(user=user)
-        self.assertTrue(is_blog_owner(user, blog))     
+        self.assertTrue(is_blog_owner(user, blog))
 
     def test_is_not_blog_owner(self):
         user1 = UserFactory()
         user2 = UserFactory()
         blog = BlogFactory(user=user1)
-        self.assertFalse(is_blog_owner(user2, blog))   
+        self.assertFalse(is_blog_owner(user2, blog))
 
     def test_filter_posts_by_blog(self):
         blog1 = BlogFactory()
@@ -36,12 +45,11 @@ class TestUtils(TestCase):
         self.assertEqual(filtered_posts2.count(), 1)
         self.assertEqual(filtered_posts2[0].id, post2.id)
 
-
     def test_authenticate_user(self):
-        user = UserFactory(password='password')
-        authenticated_user = authenticate_user(user.username, 'password')
+        user = UserFactory(password="password")
+        authenticated_user = authenticate_user(user.username, "password")
         self.assertEqual(authenticated_user.id, user.id)
-        authenticated_user = authenticate_user(user.username, 'wrong_password')
+        authenticated_user = authenticate_user(user.username, "wrong_password")
         self.assertIsNone(authenticated_user)
 
     def test_create_user_token(self):
@@ -51,7 +59,7 @@ class TestUtils(TestCase):
         self.assertEqual(token, Token.objects.get(user=user).key)
 
     def test_delete_user_token(self):
-        user = UserFactory() 
+        user = UserFactory()
         token = create_user_token(user)
         self.assertIsNotNone(token)
         self.assertEqual(token, Token.objects.get(user=user).key)

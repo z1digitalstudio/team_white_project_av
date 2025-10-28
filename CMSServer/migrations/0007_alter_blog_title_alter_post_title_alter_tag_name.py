@@ -7,23 +7,55 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('CMSServer', '0006_alter_blog_options_alter_post_options_and_more'),
+        ("CMSServer", "0006_alter_blog_options_alter_post_options_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='blog',
-            name='title',
-            field=models.CharField(help_text='Blog title (minimum 5 characters)', max_length=200, validators=[django.core.validators.MinLengthValidator(5, message='Blog title must be at least 5 characters long'), django.core.validators.RegexValidator(message='Blog title contains invalid characters', regex='^[a-zA-Z0-9\\s\\-\\_áéíóúñÁÉÍÓÚÑ]+$')]),
+            model_name="blog",
+            name="title",
+            field=models.CharField(
+                help_text="Blog title (minimum 5 characters)",
+                max_length=200,
+                validators=[
+                    django.core.validators.MinLengthValidator(
+                        5, message="Blog title must be at least 5 characters long"
+                    ),
+                    django.core.validators.RegexValidator(
+                        message="Blog title contains invalid characters",
+                        regex="^[a-zA-Z0-9\\s\\-\\_áéíóúñÁÉÍÓÚÑ]+$",
+                    ),
+                ],
+            ),
         ),
         migrations.AlterField(
-            model_name='post',
-            name='title',
-            field=models.CharField(help_text='Post title (minimum 5 characters)', max_length=200, validators=[django.core.validators.MinLengthValidator(5, message='Post title must be at least 5 characters long')]),
+            model_name="post",
+            name="title",
+            field=models.CharField(
+                help_text="Post title (minimum 5 characters)",
+                max_length=200,
+                validators=[
+                    django.core.validators.MinLengthValidator(
+                        5, message="Post title must be at least 5 characters long"
+                    )
+                ],
+            ),
         ),
         migrations.AlterField(
-            model_name='tag',
-            name='name',
-            field=models.CharField(help_text='Tag name (minimum 2 characters)', max_length=200, validators=[django.core.validators.MinLengthValidator(2, message='Tag name must be at least 2 characters long'), django.core.validators.RegexValidator(message='Tag name contains invalid characters', regex='^[a-zA-Z0-9\\s\\-\\_áéíóúñÁÉÍÓÚÑ]+$')]),
+            model_name="tag",
+            name="name",
+            field=models.CharField(
+                help_text="Tag name (minimum 2 characters)",
+                max_length=200,
+                validators=[
+                    django.core.validators.MinLengthValidator(
+                        2, message="Tag name must be at least 2 characters long"
+                    ),
+                    django.core.validators.RegexValidator(
+                        message="Tag name contains invalid characters",
+                        regex="^[a-zA-Z0-9\\s\\-\\_áéíóúñÁÉÍÓÚÑ]+$",
+                    ),
+                ],
+            ),
         ),
     ]

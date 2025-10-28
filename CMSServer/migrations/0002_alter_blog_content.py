@@ -7,13 +7,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('CMSServer', '0001_initial'),
+        ("CMSServer", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='blog',
-            name='content',
+            model_name="blog",
+            name="content",
             field=tinymce.models.HTMLField(),
         ),
     ]
