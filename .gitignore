@@ -2,18 +2,71 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
 # Virtualenv
 venv/
 .env/
 .venv/
+ENV/
+env/
+venv.bak/
 
 # Django
 db.sqlite3
+db.sqlite3-journal
 media/
 staticfiles/
+static/
+*.log
+local_settings.py
+
+# Security and secrets
+.env
+.env.local
+.env.production
+secrets.json
+*.key
+*.pem
+*.crt
 
 # IDE
 .vscode/
 .idea/
 .DS_Store
+*.swp
+*.swo
+*~
+
+# Testing and coverage
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Security reports
+bandit-report.json
+safety-report.json
+
+# Docker
+.dockerignore
