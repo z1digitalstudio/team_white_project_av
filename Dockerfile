@@ -50,6 +50,11 @@ COPY --chown=django:django . .
 RUN chown -R django:django /app && \
     chmod -R 775 /app
 
+# Create temporary directories for Gunicorn with proper permissions
+RUN mkdir -p /tmp /var/tmp /usr/tmp && \
+    chown -R django:django /tmp /var/tmp /usr/tmp && \
+    chmod -R 1777 /tmp /var/tmp /usr/tmp
+
 # Run migrations before switching user (ensures DB is initialized)
 RUN python manage.py migrate --noinput || echo "Database ready"
 
