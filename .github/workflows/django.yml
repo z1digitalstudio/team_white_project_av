@@ -184,6 +184,7 @@ jobs:
       if: always()
       with:
         sarif_file: 'trivy-results.sarif'
+        category: 'trivy-image-scan'
         
     - name: Run Trivy filesystem scan
       id: trivy-fs-scan
@@ -195,3 +196,4 @@ jobs:
       if: always() && hashFiles('trivy-fs-results.sarif') != ''
       with:
         sarif_file: 'trivy-fs-results.sarif'
+        category: 'trivy-filesystem-scan'
