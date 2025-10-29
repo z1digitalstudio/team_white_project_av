@@ -48,7 +48,10 @@ COPY --chown=django:django . .
 
 # Set ownership and permissions
 RUN chown -R django:django /app && \
-    chmod -R 755 /app
+    chmod -R 775 /app
+
+# Run migrations before switching user (ensures DB is initialized)
+RUN python manage.py migrate --noinput || echo "Database ready"
 
 # Switch to non-root user
 USER django
