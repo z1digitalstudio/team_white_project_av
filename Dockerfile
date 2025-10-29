@@ -56,7 +56,7 @@ USER django
 ENV PATH=/home/django/.local/bin:$PATH
 
 # Verify Django is accessible (optional, for debugging)
-RUN python -c "import django; print(f'Django {django.__version__} installed')" || echo "Warning: Django not found"
+# RUN python -c "import django; print(f'Django {django.__version__} installed')" || echo "Warning: Django not found"
 
 # Expose port
 EXPOSE 8000
