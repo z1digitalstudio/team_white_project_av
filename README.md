@@ -15,9 +15,10 @@ Una API REST completa para gestión de blogs, posts y etiquetas con autenticaci�
 
 ## 📋 Requisitos
 
-- Python 3.8+
+- Python 3.12+ (recomendado)
 - Django 5.2+
 - SQLite3 (base de datos incluida)
+- pip (gestor de paquetes Python)
 
 ## 🛠️ Instalación
 
@@ -36,22 +37,38 @@ source venv/bin/activate  # En Windows: venv\Scripts\activate
 ### 3. Instalar dependencias
 ```bash
 pip install -r requirements.txt
+pip install -r requirements-dev.txt  # Opcional: para desarrollo y testing
 ```
 
-### 4. Configurar base de datos SQLite3
+### 4. Configurar variables de entorno
+Copia el archivo de ejemplo y configura tus variables:
+```bash
+cp .env.example .env
+```
+
+Genera una SECRET_KEY segura:
+```bash
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+Edita el archivo `.env` y actualiza `SECRET_KEY` con el valor generado.
+
+### 5. Configurar base de datos SQLite3
 ```bash
 python manage.py migrate
 ```
 
-### 5. Crear superusuario (opcional)
+### 6. Crear superusuario (opcional)
 ```bash
 python manage.py createsuperuser
 ```
 
-### 6. Ejecutar servidor
+### 7. Ejecutar servidor
 ```bash
 python manage.py runserver
 ```
+
+El servidor estará disponible en http://localhost:8000/
 
 ## 📚 Documentación de la API
 
@@ -163,6 +180,12 @@ DELETE /cms/api/tags/{id}/
 
 ## 🧪 Testing
 
+### Prerequisitos
+Asegúrate de tener instalado `requirements-dev.txt`:
+```bash
+pip install -r requirements-dev.txt
+```
+
 ### Ejecutar tests
 ```bash
 # Todos los tests
@@ -185,12 +208,40 @@ pytest CMSServer/tests/tests_models.py
 ## 🔧 Configuración
 
 ### Variables de entorno
-Crea un archivo `.env` en la raíz del proyecto:
+
+El proyecto usa variables de entorno para configuración sensible. Sigue estos pasos:
+
+1. **Copia el archivo de ejemplo**:
+```bash
+cp .env.example .env
+```
+
+2. **Genera una SECRET_KEY segura**:
+```bash
+python manage.py shell -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+3. **Edita el archivo `.env`** con tus valores:
 
 ```env
-SECRET_KEY=tu_secret_key_aqui
-DEBUG=True
+SECRET_KEY=tu_secret_key_generada_aqui
+DEBUG=1
+DATABASE_URL=sqlite:///db.sqlite3
 ALLOWED_HOSTS=localhost,127.0.0.1
+DJANGO_SETTINGS_MODULE=ProyectoAlvaroValero.settings
+```
+
+**Nota**: El archivo `.env` no se commitea al repositorio por seguridad. Usa `.env.example` como referencia.
+
+**Importante**: Si ejecutas `runserver` directamente (sin docker-compose), necesitarás instalar `python-dotenv`:
+```bash
+pip install python-dotenv
+```
+
+Y añadir estas líneas al inicio de `settings.py` (después de `import os`):
+```python
+from dotenv import load_dotenv
+load_dotenv()  # Carga las variables del archivo .env
 ```
 ## 📦 Estructura del proyecto
 
@@ -208,10 +259,13 @@ ProyectoAlvaroValero/
 ├── ProyectoAlvaroValero/     # Configuración del proyecto
 │   ├── settings.py           # Configuración
 │   └── urls.py                # URLs principales
-├── db.sqlite3                # Base de datos SQLite3
-├── requirements.txt           # Dependencias
-├── pytest.ini               # Configuración de tests
-└── README.md                # Este archivo
+├── .env.example              # Plantilla de variables de entorno
+├── .gitignore                # Archivos ignorados por git
+├── requirements.txt          # Dependencias de producción
+├── requirements-dev.txt      # Dependencias de desarrollo
+├── pytest.ini                # Configuración de tests
+└── README.md                 # Este archivo
+
 ```
 
 ## 🚀 Despliegue
@@ -231,6 +285,42 @@ python manage.py migrate
 
 # Recopilar archivos estáticos
 python manage.py collectstatic
+```
+
+## 🐛 Solución de Problemas
+
+### Error: "Couldn't import Django"
+- Asegúrate de tener el entorno virtual activado
+- Verifica que instalaste las dependencias: `pip install -r requirements.txt`
+
+### Error: "SECRET_KEY not found"
+- Verifica que creaste el archivo `.env` desde `.env.example`
+- Asegúrate de que el archivo `.env` está en la raíz del proyecto
+- Si usas `runserver` directamente, instala `python-dotenv` y añade `load_dotenv()` en `settings.py`
+
+### Error: "ModuleNotFoundError"
+- Instala las dependencias: `pip install -r requirements.txt`
+- Si usas herramientas de desarrollo: `pip install -r requirements-dev.txt`
+
+### Variables de entorno no se cargan
+- Si usas `runserver` directamente (sin docker-compose), instala `python-dotenv`:
+  ```bash
+  pip install python-dotenv
+  ```
+- Añade al inicio de `settings.py` (después de `import os`):
+  ```python
+  from dotenv import load_dotenv
+  load_dotenv()
+  ```
+- O exporta manualmente las variables antes de ejecutar:
+  ```bash
+  export SECRET_KEY=$(grep SECRET_KEY .env | cut -d '=' -f2)
+  python manage.py runserver
+  ```
+
+### Error al ejecutar tests
+- Asegúrate de tener instalado `requirements-dev.txt`
+- Verifica que la base de datos está migrada: `python manage.py migrate`
 
 ```
 
