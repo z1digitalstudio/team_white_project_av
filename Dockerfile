@@ -29,31 +29,34 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Corrected library names for runtime
+# Install runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libjpeg62-turbo \
     libpng16-16 \
     libfreetype6 \
     && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user
-RUN groupadd -r django && useradd -r -g django django
+# Create non-root user FIRST
+RUN groupadd -r django && useradd -r -g django -m -d /home/django django
 
-# Copy dependencies from builder
-COPY --from=builder /root/.local /home/django/.local
+# Copy dependencies from builder to user's home directory
+COPY --from=builder --chown=django:django /root/.local /home/django/.local
 
 # Copy application code
 COPY --chown=django:django . .
 
-# Set ownership and permissions for application code
+# Set ownership and permissions
 RUN chown -R django:django /app && \
     chmod -R 755 /app
 
 # Switch to non-root user
 USER django
 
-# Update PATH for non-root user
+# Update PATH for non-root user (MUST be after USER directive)
 ENV PATH=/home/django/.local/bin:$PATH
+
+# Verify Django is accessible (optional, for debugging)
+RUN python -c "import django; print(f'Django {django.__version__} installed')" || echo "Warning: Django not found"
 
 # Expose port
 EXPOSE 8000
