@@ -62,4 +62,4 @@ ENV PATH=/home/django/.local/bin:$PATH
 EXPOSE 8000
 
 # Command
-CMD ["/home/django/.local/bin/python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
