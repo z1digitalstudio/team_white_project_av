@@ -39,8 +39,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Create non-root user FIRST
 RUN groupadd -r django && useradd -r -g django -m -d /home/django django
 
-# Copy dependencies from builder to user's home directory
-COPY --from=builder --chown=django:django /root/.local /home/django/.local
+# Copy Python dependencies from builder to system location
+COPY --from=builder /root/.local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /root/.local/bin /usr/local/bin
 
 # Copy application code
 COPY --chown=django:django . .
@@ -51,12 +52,6 @@ RUN chown -R django:django /app && \
 
 # Switch to non-root user
 USER django
-
-# Update PATH for non-root user (MUST be after USER directive)
-ENV PATH=/home/django/.local/bin:$PATH
-
-# Verify Django is accessible (optional, for debugging)
-# RUN python -c "import django; print(f'Django {django.__version__} installed')" || echo "Warning: Django not found"
 
 # Expose port
 EXPOSE 8000
