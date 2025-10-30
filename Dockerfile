@@ -50,10 +50,6 @@ COPY --chown=django:django . .
 RUN chown -R django:django /app && \
     chmod -R 775 /app
 
-# Create temporary directories for Gunicorn with proper permissions
-RUN mkdir -p /tmp /var/tmp /usr/tmp && \
-    chown -R django:django /tmp /var/tmp /usr/tmp && \
-    chmod -R 1777 /tmp /var/tmp /usr/tmp
 
 # Run migrations before switching user (ensures DB is initialized)
 RUN python manage.py migrate --noinput || echo "Database ready"
@@ -64,5 +60,5 @@ USER django
 # Expose port
 EXPOSE 8000
 
-# Command
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "ProyectoAlvaroValero.wsgi:application"]
+# Command 
+CMD ["waitress-serve", "--host=0.0.0.0", "--port=8000", "ProyectoAlvaroValero.wsgi:application"]
