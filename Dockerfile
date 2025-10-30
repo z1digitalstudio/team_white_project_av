@@ -60,5 +60,5 @@ USER django
 # Expose port
 EXPOSE 8000
 
-# Command 
-CMD ["waitress-serve", "--host=0.0.0.0", "--port=8000", "ProyectoAlvaroValero.wsgi:application"]
+# Command - Waitress with verbose logging for better debugging
+CMD ["waitress-serve", "--host=0.0.0.0", "--port=8000", "--verbose", "ProyectoAlvaroValero.wsgi:application"]
