@@ -2,7 +2,6 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.http import JsonResponse
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularRedocView,
@@ -10,13 +9,8 @@ from drf_spectacular.views import (
 )
 
 
-def health_check(request):
-    """Simple health check endpoint"""
-    return JsonResponse({"status": "ok"})
-
 urlpatterns = [
-    path("", health_check, name="health_check"),  
-    path("health/", health_check, name="health_check_alt"),
+
     path("admin/", admin.site.urls),
     path("tinymce/", include("tinymce.urls")),
     path("cms/", include("CMSServer.urls")),
