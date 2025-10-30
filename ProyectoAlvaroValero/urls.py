@@ -11,7 +11,8 @@ from drf_spectacular.views import (
 
 
 def health_check(request):
-    return JsonResponse({"status": "healthy", "service": "cms-server"})
+    """Simple health check endpoint"""
+    return JsonResponse({"status": "ok"})
 
 urlpatterns = [
     path("", health_check, name="health_check"),  
