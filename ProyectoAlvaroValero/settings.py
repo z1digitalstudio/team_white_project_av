@@ -27,7 +27,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-^mrptlcot@4r5gy$v@!gkv0guq
 DEBUG = os.getenv("DEBUG", "0") == "1"
 
 ALLOWED_HOSTS = [
-    host.strip() for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    host.strip() for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,blogcmsalvarovalero.sherpa.software").split(",")
 ]
 
 
