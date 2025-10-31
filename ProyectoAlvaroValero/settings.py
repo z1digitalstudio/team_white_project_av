@@ -30,6 +30,17 @@ ALLOWED_HOSTS = [
     host.strip() for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,teamwhiteprojectav-production.up.railway.app").split(",")
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://teamwhiteprojectav-production.up.railway.app",
+    "https://*.railway.app",  
+]
+
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = False 
+
+
 
 # Application definition
 
