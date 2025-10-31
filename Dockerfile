@@ -52,11 +52,14 @@ COPY --chown=django:django . .
 RUN chown -R django:django /app && \
     chmod -R 775 /app
 
+# Run migrations before switching user (ensures DB is initialized)
+RUN python manage.py migrate --noinput || echo "Database ready"
+
 # Switch to non-root user
 USER django
 
 # Expose port
 EXPOSE 8000
 
-# Command - ejecutar migraciones, collectstatic y luego iniciar servidor
-CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py collectstatic --noinput && waitress-serve --host=0.0.0.0 --port=${PORT:-8000} ProyectoAlvaroValero.wsgi:application"]
+# Command - Waitress server usando la variable PORT de Railway
+CMD ["sh", "-c", "waitress-serve --host=0.0.0.0 --port=${PORT:-8000} ProyectoAlvaroValero.wsgi:application"]
