@@ -105,7 +105,7 @@ WSGI_APPLICATION = "ProyectoAlvaroValero.wsgi.application"
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-if DATABASE_URL:
+if DATABASE_URL and DATABASE_URL.startswith("postgresql"):
     DATABASES = {
         "default": dj_database_url.config(
             default=DATABASE_URL,
@@ -114,10 +114,16 @@ if DATABASE_URL:
         )
     }
 else:
+
+    if os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("RAILWAY"):
+        db_path = os.path.join(tempfile.gettempdir(), "db.sqlite3")
+    else:
+        db_path = BASE_DIR / "db.sqlite3"
+    
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+            "NAME": db_path,
         }
     }
 
