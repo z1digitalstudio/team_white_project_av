@@ -39,8 +39,13 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libjpeg-dev libpng-dev libfreetype6-dev postgresql-client
-        
+        sudo apt-get install -y \
+          libjpeg-dev \
+          libpng-dev \
+          libfreetype6-dev \
+          libpq-dev \
+          postgresql-client
+          
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
