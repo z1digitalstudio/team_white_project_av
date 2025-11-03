@@ -59,4 +59,4 @@ USER django
 EXPOSE 8000
 
 # Command - Run migrations and then start server
-CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py collectstatic --noinput && waitress-serve --host=0.0.0.0 --port=$PORT ProyectoAlvaroValero.wsgi:application"]
+CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py collectstatic --noinput && python init_superuser.py && waitress-serve --host=0.0.0.0 --port=$PORT ProyectoAlvaroValero.wsgi:application"]
