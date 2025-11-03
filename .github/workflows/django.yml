@@ -39,7 +39,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libjpeg-dev libpng-dev libfreetype6-dev
+        sudo apt-get install -y libjpeg-dev libpng-dev libfreetype6-dev postgresql-client
         
     - name: Install Python dependencies
       run: |
@@ -133,23 +133,32 @@ jobs:
       
     - name: Test Docker image
       run: |
-        docker run --rm -d --name cms-test -p 8000:8000 cms-server:test
-        
+        docker run --rm -d \
+          --name cms-test \
+          -p 8000:8000 \
+          -e PORT=8000 \
+          -e DEBUG=0 \
+          -e ALLOWED_HOSTS=localhost,127.0.0.1 \
+          -e SECRET_KEY=test-secret-key-for-ci \
+          -e DJANGO_SETTINGS_MODULE=ProyectoAlvaroValero.settings \
+          cms-server:test        
+          
         sleep 30
         
         docker ps | grep cms-test
-        
+          
         docker logs cms-test
-
-        curl -f http://localhost:8000/admin/ || {
-          echo "Admin endpoint failed, trying root endpoint..."
-          curl -f http://localhost:8000/ || {
-            echo "Root endpoint failed, checking container status..."
+  
+        curl -f http://localhost:8000/ || {
+          echo "Root endpoint failed, trying admin endpoint..."
+          curl -f http://localhost:8000/admin/ || {
+            echo "All endpoints failed, checking container status..."
             docker logs cms-test
+            docker stop cms-test
             exit 1
           }
         }
-        
+          
         docker stop cms-test
 
   container-security:
