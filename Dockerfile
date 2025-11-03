@@ -47,6 +47,8 @@ RUN groupadd -r django && useradd -r -g django -m -d /home/django django
 COPY --from=builder /root/.local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=builder /root/.local/bin /usr/local/bin
 
+RUN pip install --no-cache-dir --force-reinstall psycopg2-binary==2.9.0
+
 # Copy application code
 COPY --chown=django:django . .
 
