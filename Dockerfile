@@ -37,7 +37,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng16-16 \
     libfreetype6 \
     libpq5 \
-    libpq-dev
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user FIRST
