@@ -37,9 +37,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng16-16 \
     libfreetype6 \
     libpq5 \
+    libpq-dev
     && rm -rf /var/lib/apt/lists/*
-
-RUN pip install --no-cache-dir --force-reinstall psycopg2-binary==2.9.0
 
 # Create non-root user FIRST
 RUN groupadd -r django && useradd -r -g django -m -d /home/django django
