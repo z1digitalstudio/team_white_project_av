@@ -31,13 +31,13 @@ cd ProyectoAlvaroValero
 ### 2. Crear entorno virtual
 ```bash
 python -m venv venv
-source venv/bin/activate  # En Windows: venv\Scripts\activate
+source venv/bin/activate 
 ```
 
 ### 3. Instalar dependencias
 ```bash
 pip install -r requirements.txt
-pip install -r requirements-dev.txt  # Opcional: para desarrollo y testing
+pip install -r requirements-dev.txt 
 ```
 
 ### 4. Configurar variables de entorno
@@ -276,16 +276,26 @@ python manage.py runserver
 ```
 
 ### Producción
-```bash
-# Instalar dependencias
-pip install -r requirements.txt
 
-# Aplicar migraciones
-python manage.py migrate
+El proyecto está desplegado en **Railway** y está disponible en:
 
-# Recopilar archivos estáticos
-python manage.py collectstatic
-```
+**🌐 URL de Producción:** https://teamwhiteprojectav-production.up.railway.app
+
+#### Endpoints principales:
+- **API Base**: https://teamwhiteprojectav-production.up.railway.app/cms/api/
+- **Admin Panel**: https://teamwhiteprojectav-production.up.railway.app/admin/
+- **Documentación Swagger**: https://teamwhiteprojectav-production.up.railway.app/api/docs/
+- **Documentación ReDoc**: https://teamwhiteprojectav-production.up.railway.app/api/redoc/
+
+#### Configuración automática
+
+El despliegue en Railway está configurado para:
+- ✅ Ejecutar migraciones automáticamente
+- ✅ Recopilar archivos estáticos
+- ✅ Crear superusuario automáticamente (si se configuran las variables de entorno)
+- ✅ Conectar con PostgreSQL automáticamente
+
+Para más detalles sobre la configuración, consulta la [documentación de la API](API_DOCUMENTATION.md).
 
 ## 🐛 Solución de Problemas
 
