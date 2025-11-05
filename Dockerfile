@@ -32,7 +32,7 @@ RUN groupadd -r django && useradd -r -g django django
 
 # Copy application code
 COPY --chown=django:django . .
-RUN chmod -R 755 /app
+RUN chmod -R 775 /app
 
 # Switch to non-root user
 USER django
