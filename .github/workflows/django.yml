@@ -140,7 +140,8 @@ jobs:
       
     - name: Test Docker image
       run: |
-        docker run --rm -d \
+        # Run container and capture ID
+        CONTAINER_ID=$(docker run -d \
           --name cms-test \
           -p 8000:8000 \
           -e PORT=8000 \
@@ -148,24 +149,78 @@ jobs:
           -e ALLOWED_HOSTS=localhost,127.0.0.1 \
           -e SECRET_KEY=test-secret-key-for-ci \
           -e DJANGO_SETTINGS_MODULE=ProyectoAlvaroValero.settings \
-          cms-server:test        
-          
-        sleep 30
+          cms-server:test 2>&1) || true
         
-        docker ps | grep cms-test
+        echo "Container ID: $CONTAINER_ID"
+        
+        # Wait a moment
+        sleep 3
+        
+        # Check if container is still running
+        if ! docker ps --format "{{.Names}}" | grep -q "^cms-test$"; then
+          echo "❌ Container stopped immediately!"
+          echo ""
+          echo "📋 Container status:"
+          docker ps -a --filter "name=cms-test" || true
+          echo ""
+          echo "📋 Exit code:"
+          docker inspect --format='{{.State.ExitCode}}' cms-test 2>/dev/null || echo "N/A"
+          echo ""
+          echo "📋 Full container logs:"
+          docker logs cms-test 2>&1 || echo "Could not get logs"
+          echo ""
+          exit 1
+        fi
+        
+        echo "✅ Container is running. Waiting for app..."
+        
+        # Show initial logs
+        echo "📋 Initial logs:"
+        docker logs --tail 30 cms-test 2>&1 || true
+        
+        # Wait for app with retries
+        MAX_RETRIES=12
+        for i in $(seq 1 $MAX_RETRIES); do
+          sleep 5
           
-        docker logs cms-test
-  
+          # Check if still running
+          if ! docker ps --format "{{.Names}}" | grep -q "^cms-test$"; then
+            echo "❌ Container stopped during startup!"
+            echo "📋 Final logs:"
+            docker logs cms-test 2>&1 || true
+            exit 1
+          fi
+          
+          # Try to connect
+          if curl -f http://localhost:8000/ > /dev/null 2>&1; then
+            echo "✅ App is responding!"
+            break
+          fi
+          
+          if [ $i -eq $MAX_RETRIES ]; then
+            echo "❌ App did not respond after $((MAX_RETRIES * 5)) seconds"
+            echo "📋 Final logs:"
+            docker logs cms-test 2>&1 || true
+            docker stop cms-test || true
+            exit 1
+          fi
+          
+          echo "Waiting... ($i/$MAX_RETRIES)"
+        done
+        
+        # Final test
+        echo "🧪 Testing endpoints..."
         curl -f http://localhost:8000/ || {
-          echo "Root endpoint failed, trying admin endpoint..."
+          echo "⚠️ Root endpoint failed, trying admin..."
           curl -f http://localhost:8000/admin/ || {
-            echo "All endpoints failed, checking container status..."
-            docker logs cms-test
+            echo "❌ All endpoints failed"
+            docker logs cms-test 2>&1
             docker stop cms-test
             exit 1
           }
         }
-          
+        
+        echo "✅ All tests passed!"
         docker stop cms-test
 
   container-security:
