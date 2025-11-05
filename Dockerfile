@@ -32,7 +32,12 @@ RUN groupadd -r django && useradd -r -g django django
 
 # Copy application code
 COPY --chown=django:django . .
-RUN chmod -R 775 /app
+
+# Ensure /app directory has correct ownership and permissions
+RUN chown -R django:django /app && \
+    chmod -R 775 /app && \
+    # Ensure the directory itself has write permissions
+    chmod 777 /app
 
 # Switch to non-root user
 USER django
