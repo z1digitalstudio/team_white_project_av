@@ -51,7 +51,7 @@ pip install -r requirements-dev.txt
 
 #### Variables de entorno:
 - `PYTHON_VERSION`: 3.14
-- `DJANGO_SETTINGS_MODULE`: ProyectoAlvaroValero.settings
+- `DJANGO_SETTINGS_MODULE`: Core.settings
 
 ### Uso Local
 

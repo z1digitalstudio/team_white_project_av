@@ -8,7 +8,7 @@ on:
 
 env:
   PYTHON_VERSION: '3.12'
-  DJANGO_SETTINGS_MODULE: 'ProyectoAlvaroValero.settings'
+  DJANGO_SETTINGS_MODULE: 'Core.settings'
 
 permissions:
   contents: read
@@ -148,7 +148,7 @@ jobs:
           -e DEBUG=0 \
           -e ALLOWED_HOSTS=localhost,127.0.0.1 \
           -e SECRET_KEY=test-secret-key-for-ci \
-          -e DJANGO_SETTINGS_MODULE=ProyectoAlvaroValero.settings \
+          -e DJANGO_SETTINGS_MODULE=Core.settings \
           cms-server:test 2>&1) || true
         
         echo "Container ID: $CONTAINER_ID"
