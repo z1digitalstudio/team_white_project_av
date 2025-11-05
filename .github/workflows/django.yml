@@ -2,9 +2,9 @@ name: Django CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, 'feature/**', 'release/**', 'hotfix/**' ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
 
 env:
   PYTHON_VERSION: '3.12'
