@@ -192,10 +192,10 @@ pip install -r requirements-dev.txt
 pytest
 
 # Tests con cobertura
-pytest --cov=CMSServer
+pytest --cov=blog
 
 # Tests específicos
-pytest CMSServer/tests/tests_models.py
+pytest blog/tests/tests_models.py
 ```
 
 ### Tests disponibles
@@ -247,7 +247,7 @@ load_dotenv()  # Carga las variables del archivo .env
 
 ```
 Core/
-├── CMSServer/                 # App principal
+├── blog/                 # App principal
 │   ├── models.py             # Modelos de datos
 │   ├── views.py              # ViewSets con documentación
 │   ├── serializers.py        # Serializers con ejemplos

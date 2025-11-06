@@ -34,7 +34,9 @@ urlpatterns = [
     path("", root_view, name="root"),
     path("admin/", admin.site.urls),
     path("tinymce/", include("tinymce.urls")),
-    path("cms/", include("CMSServer.urls")),
+    path("cms/", include("user.urls")),
+    path("cms/", include("tag.urls")),
+    path("cms/", include("blog.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "api/docs/",

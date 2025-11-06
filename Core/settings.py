@@ -56,7 +56,9 @@ INSTALLED_APPS = [
     "import_export",
     "rest_framework",
     "rest_framework.authtoken",
-    "CMSServer",
+    "user",
+    "blog",
+    "tag",
     "drf_spectacular",
 ]
 
@@ -96,7 +98,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.AllowAny",
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "EXCEPTION_HANDLER": "CMSServer.exceptions.custom_exception_handler",
+    "EXCEPTION_HANDLER": "blog.exceptions.custom_exception_handler",
 }
 
 WSGI_APPLICATION = "Core.wsgi.application"
