@@ -1,24 +1,23 @@
 from django.test import TestCase
 from blog.tests.factories import UserFactory, BlogFactory, PostFactory
-from blog.utils import get_blog_owner, is_blog_owner
 from blog.models import Post
 
 
 class TestBlogUtils(TestCase):
     def test_get_blog_owner(self):
         blog = BlogFactory()
-        self.assertIsNotNone(get_blog_owner(blog))
+        self.assertIsNotNone(blog.user)
 
     def test_is_blog_owner(self):
         user = UserFactory()
         blog = BlogFactory(user=user)
-        self.assertTrue(is_blog_owner(user, blog))
+        self.assertTrue(blog.is_owner(user))
 
     def test_is_not_blog_owner(self):
         user1 = UserFactory()
         user2 = UserFactory()
         blog = BlogFactory(user=user1)
-        self.assertFalse(is_blog_owner(user2, blog))
+        self.assertFalse(blog.is_owner(user2))
 
     def test_filter_posts_by_blog(self):
         blog1 = BlogFactory()

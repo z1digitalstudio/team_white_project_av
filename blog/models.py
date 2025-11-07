@@ -28,6 +28,9 @@ class Blog(models.Model):
     def __str__(self):
         return self.title
 
+    def is_owner(self, user: User) -> bool:
+        return user == self.user
+
 
 
 class Post(models.Model):
