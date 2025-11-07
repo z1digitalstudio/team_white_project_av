@@ -1,8 +1,9 @@
-from django.core.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied
 from django.utils.translation import gettext_lazy as _
 from .permissions import can_edit_post, can_add_post
-from .utils import filter_posts_by_blog
 from blog.exceptions import AuthenticationError
+from rest_framework import permissions
+from .models import Blog
 
 
 class PostReadonlyFieldsMixin:
@@ -18,12 +19,8 @@ class PublicReadOnlyMixin:
     def get_permissions(self):
 
         if self.action == "list" or self.action == "retrieve":
-            from rest_framework import permissions
-
             permission_classes = [permissions.AllowAny]
         else:
-            from rest_framework import permissions
-
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
 
@@ -40,8 +37,6 @@ class LimitBlogChoicesToOwnerMixin:
 class BlogOwnerPermissionMixin:
 
     def get_permissions(self):
-        from rest_framework import permissions
-
         if self.action == "list" or self.action == "retrieve":
             permission_classes = [permissions.AllowAny]
         else:
@@ -51,15 +46,11 @@ class BlogOwnerPermissionMixin:
     def perform_update(self, serializer):
         blog = self.get_object()
         if blog.user != self.request.user and not self.request.user.is_superuser:
-            from rest_framework.exceptions import PermissionDenied
-
             raise PermissionDenied("Only the owner of the blog can edit it")
         serializer.save()
 
     def perform_destroy(self, instance):
         if instance.user != self.request.user and not self.request.user.is_superuser:
-            from rest_framework.exceptions import PermissionDenied
-
             raise PermissionDenied("Only the owner of the blog can delete it")
         instance.delete()
 
@@ -90,17 +81,14 @@ class PostEditorMixin:
         if request.user.is_superuser:
             return super().save_model(request, obj, form, change)
 
-        if not change:
-            if not can_add_post(request.user, obj.blog):
-                raise PermissionDenied(_("You are not allowed to add this post."))
-        else:
-            if "blog" in getattr(form, "changed_data", []):
-                if not can_edit_post(request.user, obj.blog):
-                    raise PermissionDenied(
-                        _(
-                            "You are not allowed to move the post to a blog that is not yours."
-                        )
-                    )
+        if not change and not can_add_post(request.user, obj.blog):
+            raise PermissionDenied(_("You are not allowed to add this post."))
+
+        if change and "blog" in getattr(form, "changed_data", []):
+            if not can_edit_post(request.user, obj.blog):
+                raise PermissionDenied(
+                    _("You are not allowed to move the post to a blog that is not yours.")
+                )
 
         return super().save_model(request, obj, form, change)
 
@@ -109,8 +97,6 @@ class PostEditorMixin:
             raise AuthenticationError(_("Authentication required to create posts."))
 
         if not hasattr(self.request.user, "blog"):
-            from .models import Blog
-
             blog = Blog.objects.create(
                 title=f"Blog de {self.request.user.username}",
                 description="Blog personal",
@@ -136,9 +122,3 @@ class PostEditorMixin:
             raise PermissionDenied(_("You are not allowed to delete this post."))
         instance.delete()
 
-
-class FilterPostsByBlogViewSetMixin:
-    def get_queryset(self):
-        qs = super().get_queryset()
-        blog_id = self.request.query_params.get("blog_id")
-        return filter_posts_by_blog(qs, blog_id)

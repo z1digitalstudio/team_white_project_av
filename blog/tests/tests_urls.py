@@ -48,3 +48,18 @@ class TestUrls(TestCase):
         url = reverse("post-detail", args=[self.post.id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+
+    def test_get_posts_by_blog_id(self):
+        self.client.force_login(self.user)
+        url = reverse("post-list")
+        response = self.client.get(url, {"blog_id": self.blog.id})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["id"], self.post.id)
+
+    def test_get_posts_by_invalid_blog_id(self):
+        self.client.force_login(self.user)
+        url = reverse("post-list")
+        response = self.client.get(url, {"blog_id": "invalid"})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data["detail"], "Invalid blog ID")

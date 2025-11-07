@@ -1,7 +1,6 @@
 from django.test import TestCase
 from rest_framework.test import APITestCase
 from rest_framework.exceptions import PermissionDenied
-from django.core.exceptions import PermissionDenied as DjangoPermissionDenied
 from unittest.mock import Mock, patch
 
 from blog.mixins import (
@@ -10,7 +9,6 @@ from blog.mixins import (
     BlogOwnerPermissionMixin,
     PostOwnerQuerysetViewSetMixin,
     PostEditorMixin,
-    FilterPostsByBlogViewSetMixin,
 )
 from blog.tests.factories import UserFactory, BlogFactory, PostFactory
 from blog.models import Blog, Post
@@ -238,43 +236,6 @@ class TestPostOwnerQuerysetViewSetMixin(TestCase):
         self.assertIn(self.post, queryset)
         self.assertIn(self.other_post, queryset)
 
-
-class TestFilterPostsByBlogViewSetMixin(TestCase):
-    def setUp(self):
-        self.user = UserFactory()
-        self.user2 = UserFactory()
-        self.blog1 = BlogFactory(user=self.user)
-        self.blog2 = BlogFactory(user=self.user2)
-        self.post1 = PostFactory(blog=self.blog1)
-        self.post2 = PostFactory(blog=self.blog2)
-
-    def test_get_queryset_with_blog_filter(self):
-        class TestViewSet(FilterPostsByBlogViewSetMixin, MockViewSet):
-            pass
-
-        mixin = TestViewSet()
-        mixin.request = Mock()
-        mixin.request.query_params = {"blog_id": str(self.blog1.id)}
-
-        queryset = mixin.get_queryset()
-
-        self.assertIn(self.post1, queryset)
-        self.assertNotIn(self.post2, queryset)
-
-    def test_get_queryset_without_filter(self):
-        class TestViewSet(FilterPostsByBlogViewSetMixin, MockViewSet):
-            pass
-
-        mixin = TestViewSet()
-        mixin.request = Mock()
-        mixin.request.query_params = {}
-
-        queryset = mixin.get_queryset()
-
-        self.assertIn(self.post1, queryset)
-        self.assertIn(self.post2, queryset)
-
-
 class TestPostEditorMixin(APITestCase):
     def setUp(self):
         self.user = UserFactory()
@@ -358,7 +319,7 @@ class TestPostEditorMixin(APITestCase):
         serializer = Mock()
         mixin.get_object = Mock(return_value=self.post)
 
-        with self.assertRaises(DjangoPermissionDenied):
+        with self.assertRaises(PermissionDenied):
             mixin.perform_update(serializer)
 
     @patch("blog.mixins.can_edit_post")
@@ -394,5 +355,5 @@ class TestPostEditorMixin(APITestCase):
 
         instance = Mock()
 
-        with self.assertRaises(DjangoPermissionDenied):
+        with self.assertRaises(PermissionDenied):
             mixin.perform_destroy(instance)

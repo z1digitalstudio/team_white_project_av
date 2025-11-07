@@ -3,6 +3,7 @@ from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
 import logging
+from rest_framework.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,9 @@ class AuthenticationError(BaseAPIException):
 
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
+
+    if isinstance(exc, ValidationError):
+        return response
 
     if isinstance(exc, BaseAPIException):
         if exc.status_code >= 500:

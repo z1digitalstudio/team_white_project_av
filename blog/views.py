@@ -4,18 +4,15 @@ from .serializers import (
     BlogSerializer,
     PostSerializer,
 )
-from user.serializers import UserSerializer
 from .mixins import (
     PublicReadOnlyMixin,
     BlogOwnerPermissionMixin,
     PostEditorMixin,
     LimitBlogChoicesToOwnerMixin,
     PostOwnerQuerysetViewSetMixin,
-    FilterPostsByBlogViewSetMixin,
 )
-from blog.exceptions import AuthenticationError
 from drf_spectacular.utils import extend_schema, extend_schema_view
-
+from rest_framework.exceptions import ValidationError
 
 @extend_schema_view(
     list=extend_schema(
@@ -88,7 +85,6 @@ class BlogViewSet(
 class PostViewSet(
     BlogOwnerPermissionMixin,
     PublicReadOnlyMixin,
-    FilterPostsByBlogViewSetMixin,
     PostOwnerQuerysetViewSetMixin,
     PostEditorMixin,
     viewsets.ModelViewSet,
@@ -97,4 +93,19 @@ class PostViewSet(
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        blog_id = self.request.query_params.get("blog_id")
+
+        if blog_id is not None:
+            try:
+                blog_id_int = int(blog_id)
+            except ValueError:
+                raise ValidationError({"detail": "Invalid blog ID"})
+            if not Blog.objects.filter(id=blog_id_int).exists():
+                raise ValidationError({"detail": "Invalid blog ID"})
+
+            qs = qs.filter(blog_id=blog_id_int)
+
+        return qs
 

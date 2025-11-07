@@ -3,6 +3,7 @@ from django.core.validators import MinLengthValidator, RegexValidator
 
 
 class Tag(models.Model):
+    posts = models.ManyToManyField("blog.Post", related_name="tags")
     name = models.CharField(
         max_length=200,
         validators=[
@@ -16,7 +17,6 @@ class Tag(models.Model):
         ],
         help_text="Tag name (minimum 2 characters)",
     )
-    posts = models.ManyToManyField("blog.Post", related_name="tags")
 
     def __str__(self):
         return self.name

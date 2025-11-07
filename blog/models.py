@@ -6,6 +6,7 @@ from django.core.validators import MinLengthValidator, RegexValidator
 
 # Create your models here.
 class Blog(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="blog")
     title = models.CharField(
         max_length=200,
         validators=[
@@ -20,7 +21,6 @@ class Blog(models.Model):
         help_text="Blog title (minimum 5 characters)",
     )
     description = HTMLField()
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -28,7 +28,9 @@ class Blog(models.Model):
         return self.title
 
 
+
 class Post(models.Model):
+    blog = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name="posts")
     title = models.CharField(
         max_length=200,
         validators=[
@@ -41,9 +43,18 @@ class Post(models.Model):
     content = HTMLField()
     published_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    blog = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name="posts")
 
     def __str__(self):
         return self.title
+
+    @staticmethod
+    def filter_posts_by_blog(queryset, blog_id):
+        if blog_id is None:
+            return queryset.none()
+        try:
+            blog_id_int = int(blog_id)
+        except ValueError:
+            return queryset.none()
+        return queryset.filter(blog_id=blog_id_int)
 
 
