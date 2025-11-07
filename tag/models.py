@@ -16,6 +16,7 @@ class Tag(models.Model):
             ),
         ],
         help_text="Tag name (minimum 2 characters)",
+        unique=True,
     )
 
     def __str__(self):

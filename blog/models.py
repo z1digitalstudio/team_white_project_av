@@ -19,6 +19,7 @@ class Blog(models.Model):
             ),
         ],
         help_text="Blog title (minimum 5 characters)",
+        unique=True,
     )
     description = HTMLField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -45,7 +46,9 @@ class Post(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.title
+        return f"{self.title} - {self.blog.title}"
+
+
 
     @staticmethod
     def filter_posts_by_blog(queryset, blog_id):
