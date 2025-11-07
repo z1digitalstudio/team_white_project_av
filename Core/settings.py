@@ -107,9 +107,10 @@ WSGI_APPLICATION = "Core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("DATABASE_PUBLIC_URL")
 
-if DATABASE_URL and DATABASE_URL.startswith("postgresql"):
+# Production: Use PostgreSQL
+if DATABASE_URL and (DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith("postgres://")):
     DATABASES = {
         "default": dj_database_url.config(
             default=DATABASE_URL,
@@ -118,7 +119,7 @@ if DATABASE_URL and DATABASE_URL.startswith("postgresql"):
         )
     }
 else:
-
+    # Development: Use SQLite
     if os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("RAILWAY"):
         db_path = os.path.join(tempfile.gettempdir(), "db.sqlite3")
     else:
