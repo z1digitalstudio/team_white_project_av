@@ -8,6 +8,8 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
+from graphene_django.views import GraphQLView
+from Core.schema import schema
 
 
 def root_view(request):
@@ -25,6 +27,7 @@ def root_view(request):
             "blogs": "/cms/api/blogs/",
             "posts": "/cms/api/posts/",
             "tags": "/cms/api/tags/",
+            "graphql": "/graphql/",
         },
         "documentation": "See /api/docs/ for interactive API documentation"
     })
@@ -44,6 +47,7 @@ urlpatterns = [
         name="swagger-ui",
     ),
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+    path("graphql/", GraphQLView.as_view(graphiql=True, schema=schema)),
 ]
 
 if settings.DEBUG:

@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 import logging
+from graphql import GraphQLResolveInfo
+from user.exceptions import AuthenticationError
 
 logger = logging.getLogger(__name__)
 
@@ -32,3 +34,17 @@ def delete_user_token(user: User) -> bool:
     except Exception as e:
         logger.error(f"Error deleting token: {e}")
         return False
+
+def get_authenticated_user(info: GraphQLResolveInfo) -> User:
+    auth_header = info.context.headers.get("Authorization")
+
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise AuthenticationError("Authentication required.")
+
+    token_key = auth_header.split("Bearer ")[1].strip()
+
+    try:
+        token = Token.objects.select_related("user").get(key=token_key)
+        return token.user
+    except Token.DoesNotExist:
+        raise AuthenticationError("Invalid or expired token.")

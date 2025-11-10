@@ -30,3 +30,7 @@ class InvalidTokenError(BaseAPIException):
     default_detail = "Invalid token."
     default_code = "invalid_token"
 
+class PermissionDeniedError(BaseAPIException):
+    status_code = status.HTTP_403_FORBIDDEN
+    default_detail = "Permission denied."
+    default_code = "permission_denied"
