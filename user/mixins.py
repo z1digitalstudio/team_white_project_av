@@ -16,3 +16,5 @@ class AuthenticationMixin:
     def delete_user_token(self, user):
         return delete_user_token(user)
 
+    
+

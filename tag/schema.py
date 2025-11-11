@@ -1,27 +1,20 @@
 import graphene
-from graphene_django import DjangoObjectType
 from .models import Tag
 from user.exceptions import (
     AuthenticationError,
     PermissionDeniedError,
-    InvalidCredentialsError,
     BaseAPIException,
+    NotFoundError,
 )
 from user.utils import get_authenticated_user, is_superuser
 from blog.models import Post
-# from blog.schema import PostType
-
-
-class TagType(DjangoObjectType):
-    class Meta:
-        model = Tag
-        fields = "__all__"
+from Core.graphql_types import TagType, PostType
 
 
 class Query(graphene.ObjectType):
     tags = graphene.List(TagType)
     tag = graphene.Field(TagType, id=graphene.ID(required=True))
-    # posts_by_tag = graphene.List(PostType, id=graphene.ID(required=True))
+    posts_by_tag = graphene.List(PostType, id=graphene.ID(required=True))
     tags_by_post = graphene.List(TagType, id=graphene.ID(required=True))
     tags_by_post_name = graphene.List(TagType, post_name=graphene.String(required=True))
     tags_by_name = graphene.List(TagType, name=graphene.String(required=True))
@@ -46,28 +39,28 @@ class Query(graphene.ObjectType):
         try:
             return Tag.objects.get(id=id)
         except Tag.DoesNotExist:
-            raise InvalidCredentialsError("Tag not found")
+            raise NotFoundError("Tag not found")
 
     def resolve_posts_by_tag(self, info, id):
         try:
             tag = Tag.objects.get(id=id)
             return tag.posts.all()
         except Tag.DoesNotExist:
-            raise InvalidCredentialsError("Tag not found")
+            raise NotFoundError("Tag not found")
 
     def resolve_tags_by_post(self, info, id):
         try:
             post = Post.objects.get(id=id)
             return post.tags.all()
         except Post.DoesNotExist:
-            raise InvalidCredentialsError("Post not found")
+            raise NotFoundError("Post not found")
 
     def resolve_tags_by_post_name(self, info, post_name):
         try:
             post = Post.objects.get(name=post_name)
             return post.tags.all()
         except Post.DoesNotExist:
-            raise InvalidCredentialsError("Post not found")
+            raise NotFoundError("Post not found")
 
     def resolve_tags_by_name(self, info, name):
         try:
@@ -80,7 +73,7 @@ class Query(graphene.ObjectType):
             post = Post.objects.get(name=post_name)
             return Tag.objects.filter(name__icontains=name, posts=post)
         except Post.DoesNotExist:
-            raise InvalidCredentialsError("Post not found")
+            raise NotFoundError("Post not found")
         except Exception as e:
             raise BaseAPIException(f"Error filtering tags: {e}")
 
@@ -89,7 +82,7 @@ class Query(graphene.ObjectType):
             post = Post.objects.get(id=post_id)
             return Tag.objects.filter(name__icontains=name, posts=post)
         except Post.DoesNotExist:
-            raise InvalidCredentialsError("Post not found")
+            raise NotFoundError("Post not found")
         except Exception as e:
             raise BaseAPIException(f"Error filtering tags: {e}")
 
@@ -138,7 +131,7 @@ class UpdateTag(graphene.Mutation):
             try:
                 tag = Tag.objects.get(id=id)
             except Tag.DoesNotExist:
-                raise InvalidCredentialsError("Tag not found")
+                raise NotFoundError("Tag not found")
 
             if not name.strip():
                 raise BaseAPIException("Tag name is required")
@@ -147,7 +140,7 @@ class UpdateTag(graphene.Mutation):
             tag.save()
             return UpdateTag(tag=tag, message="Tag updated successfully", success=True)
 
-        except (AuthenticationError, InvalidCredentialsError, BaseAPIException) as e:
+        except (AuthenticationError, BaseAPIException) as e:
             raise e
         except Exception as e:
             raise BaseAPIException(f"Error updating tag: {e}")
@@ -169,18 +162,17 @@ class DeleteTag(graphene.Mutation):
             try:
                 tag = Tag.objects.get(id=id)
             except Tag.DoesNotExist:
-                raise InvalidCredentialsError("Tag not found")
+                raise NotFoundError("Tag not found")
 
             tag.delete()
             return DeleteTag(message="Tag deleted successfully", success=True)
 
-        except (AuthenticationError, InvalidCredentialsError) as e:
+        except (AuthenticationError, BaseAPIException) as e:
             raise e
         except Exception as e:
             raise BaseAPIException(f"Error deleting tag: {e}")
 
 
-"""
 class AddTagToPost(graphene.Mutation):
     post = graphene.Field(PostType)
     tag = graphene.Field(TagType)
@@ -201,7 +193,7 @@ class AddTagToPost(graphene.Mutation):
                 post = Post.objects.get(id=post_id)
                 tag = Tag.objects.get(id=tag_id)
             except (Post.DoesNotExist, Tag.DoesNotExist):
-                raise InvalidCredentialsError("Post or Tag not found")
+                raise NotFoundError("Post or Tag not found")
 
             if not (is_superuser(user) or post.user == user):
                 raise PermissionDeniedError("You are not allowed to modify this post")
@@ -214,7 +206,7 @@ class AddTagToPost(graphene.Mutation):
                 success=True,
             )
 
-        except (AuthenticationError, PermissionDeniedError, InvalidCredentialsError) as e:
+        except (AuthenticationError, PermissionDeniedError, BaseAPIException) as e:
             raise e
         except Exception as e:
             raise BaseAPIException(f"Error adding tag to post: {e}")
@@ -240,7 +232,7 @@ class RemoveTagFromPost(graphene.Mutation):
                 post = Post.objects.get(id=post_id)
                 tag = Tag.objects.get(id=tag_id)
             except (Post.DoesNotExist, Tag.DoesNotExist):
-                raise InvalidCredentialsError("Post or Tag not found")
+                raise NotFoundError("Post or Tag not found")
 
             if not (is_superuser(user) or post.user == user):
                 raise PermissionDeniedError("You are not allowed to modify this post")
@@ -253,16 +245,16 @@ class RemoveTagFromPost(graphene.Mutation):
                 success=True,
             )
 
-        except (AuthenticationError, PermissionDeniedError, InvalidCredentialsError) as e:
+        except (AuthenticationError, PermissionDeniedError, BaseAPIException) as e:
             raise e
         except Exception as e:
             raise BaseAPIException(f"Error removing tag from post: {e}")
-"""
+
 
 
 class Mutation(graphene.ObjectType):
     create_tag = CreateTag.Field()
     update_tag = UpdateTag.Field()
     delete_tag = DeleteTag.Field()
-    # add_tag_to_post = AddTagToPost.Field()
-    # remove_tag_from_post = RemoveTagFromPost.Field()
+    add_tag_to_post = AddTagToPost.Field()
+    remove_tag_from_post = RemoveTagFromPost.Field()

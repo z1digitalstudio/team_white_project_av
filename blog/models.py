@@ -31,6 +31,22 @@ class Blog(models.Model):
     def is_owner(self, user: User) -> bool:
         return user == self.user
 
+    @staticmethod
+    def filter_blogs_by_user(queryset, user_id):
+        if user_id is None:
+            return queryset.none()
+        try:
+            user_id_int = int(user_id)
+        except ValueError:
+            return queryset.none()
+        return queryset.filter(user_id=user_id_int)
+
+    @staticmethod
+    def filter_blogs_by_title(queryset, title):
+        if title is None:
+            return queryset.none()
+        return queryset.filter(title__icontains=title)
+
 
 
 class Post(models.Model):
