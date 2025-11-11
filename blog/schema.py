@@ -1,4 +1,4 @@
-
+"""
 import graphene
 from graphene_django import DjangoObjectType
 from .models import Blog, Post
@@ -93,3 +93,4 @@ class Mutation(graphene.ObjectType):
     delete_blog = DeleteBlog.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
+"""
