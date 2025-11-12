@@ -25,7 +25,7 @@ Una API REST completa para gestión de blogs, posts y etiquetas con autenticaci�
 ### 1. Clonar el repositorio
 ```bash
 git clone https://github.com/alvarovalero-z1/BlogCMSAlvaroValero.git
-cd ProyectoAlvaroValero
+cd Core
 ```
 
 ### 2. Crear entorno virtual
@@ -192,10 +192,10 @@ pip install -r requirements-dev.txt
 pytest
 
 # Tests con cobertura
-pytest --cov=CMSServer
+pytest --cov=blog
 
 # Tests específicos
-pytest CMSServer/tests/tests_models.py
+pytest blog/tests/tests_models.py
 ```
 
 ### Tests disponibles
@@ -228,7 +228,7 @@ SECRET_KEY=tu_secret_key_generada_aqui
 DEBUG=1
 DATABASE_URL=sqlite:///db.sqlite3
 ALLOWED_HOSTS=localhost,127.0.0.1
-DJANGO_SETTINGS_MODULE=ProyectoAlvaroValero.settings
+DJANGO_SETTINGS_MODULE=Core.settings
 ```
 
 **Nota**: El archivo `.env` no se commitea al repositorio por seguridad. Usa `.env.example` como referencia.
@@ -246,8 +246,8 @@ load_dotenv()  # Carga las variables del archivo .env
 ## 📦 Estructura del proyecto
 
 ```
-ProyectoAlvaroValero/
-├── CMSServer/                 # App principal
+Core/
+├── blog/                 # App principal
 │   ├── models.py             # Modelos de datos
 │   ├── views.py              # ViewSets con documentación
 │   ├── serializers.py        # Serializers con ejemplos
@@ -256,7 +256,7 @@ ProyectoAlvaroValero/
 │   ├── mixins.py             # Mixins reutilizables
 │   ├── utils.py              # Utilidades
 │   └── tests/                # Tests
-├── ProyectoAlvaroValero/     # Configuración del proyecto
+├── Core/     # Configuración del proyecto
 │   ├── settings.py           # Configuración
 │   └── urls.py                # URLs principales
 ├── .env.example              # Plantilla de variables de entorno
