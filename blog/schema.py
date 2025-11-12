@@ -9,6 +9,41 @@ from user.exceptions import (
     NotFoundError,
 )
 from Core.graphql_types import BlogType, PostType, TagType
+from blog.constants import (
+    AUTH_NOT_AUTHENTICATED,
+    BLOG_TITLE_REQUIRED,
+    BLOG_DESCRIPTION_REQUIRED,
+    BLOG_CREATED_SUCCESS,
+    BLOG_UPDATED_SUCCESS,
+    BLOG_DELETED_SUCCESS,
+    BLOG_NOT_FOUND,
+    BLOG_UPDATE_PERMISSION_DENIED,
+    BLOG_DELETE_PERMISSION_DENIED,
+    BLOG_ERROR_FETCHING,
+    BLOG_ERROR_FETCHING_BY_ID,
+    BLOG_ERROR_CREATING,
+    BLOG_ERROR_UPDATING,
+    BLOG_ERROR_DELETING,
+    POST_TITLE_REQUIRED,
+    POST_CONTENT_REQUIRED,
+    POST_CREATED_SUCCESS,
+    POST_UPDATED_SUCCESS,
+    POST_DELETED_SUCCESS,
+    POST_NOT_FOUND,
+    POST_UPDATE_PERMISSION_DENIED,
+    POST_DELETE_PERMISSION_DENIED,
+    POST_MODIFY_PERMISSION_DENIED,
+    POST_ERROR_FETCHING,
+    POST_ERROR_FETCHING_BY_ID,
+    POST_ERROR_CREATING,
+    POST_ERROR_UPDATING,
+    POST_ERROR_DELETING,
+    TAG_NOT_FOUND,
+    TAG_ADDED_TO_POST_SUCCESS,
+    TAG_REMOVED_FROM_POST_SUCCESS,
+    TAG_ERROR_ADDING_TO_POST,
+    TAG_ERROR_REMOVING_FROM_POST,
+)
 
 class Query(graphene.ObjectType):
     posts = graphene.List(PostType)
@@ -27,64 +62,64 @@ class Query(graphene.ObjectType):
         try:
             return Blog.objects.all()
         except Exception as e:
-            raise BaseAPIException(f"Error fetching blogs: {e}")
+            raise BaseAPIException(f"{BLOG_ERROR_FETCHING}: {e}")
 
     def resolve_blog(self, info, id):
         try:
             return Blog.objects.get(id=id)
         except Exception as e:
-            raise BaseAPIException(f"Error fetching blog: {e}")
+            raise BaseAPIException(f"{BLOG_ERROR_FETCHING_BY_ID}: {e}")
 
     def resolve_blogs_by_user(self, info, user_id):
         try:
             return Blog.filter_blogs_by_user(Blog.objects.all(), user_id)
         except Exception as e:
-            raise BaseAPIException(f"Error fetching blogs: {e}")
+            raise BaseAPIException(f"{BLOG_ERROR_FETCHING}: {e}")
 
     def resolve_blogs_by_title(self, info, title):
         try:
             return Blog.filter_blogs_by_title(Blog.objects.all(), title)
         except Exception as e:
-            raise BaseAPIException(f"Error fetching blogs: {e}")
+            raise BaseAPIException(f"{BLOG_ERROR_FETCHING}: {e}")
 
     def resolve_posts(self, info):
         try:
             return Post.objects.all()
         except Exception as e:
-            raise BaseAPIException(f"Error fetching posts: {e}")
+            raise BaseAPIException(f"{POST_ERROR_FETCHING}: {e}")
 
     def resolve_post(self, info, id):
         try:
             return Post.objects.get(id=id)
         except Post.DoesNotExist:
-            raise NotFoundError("Post not found")
+            raise NotFoundError(POST_NOT_FOUND)
         except Exception as e:
-            raise BaseAPIException(f"Error fetching post: {e}")
+            raise BaseAPIException(f"{POST_ERROR_FETCHING_BY_ID}: {e}")
     
     def resolve_posts_by_blog(self, info, blog_id):
         try:
             blog = Blog.objects.get(id=blog_id)
             return blog.posts.all()
         except Blog.DoesNotExist:
-            raise NotFoundError("Blog not found")
+            raise NotFoundError(BLOG_NOT_FOUND)
         except Exception as e:
-            raise BaseAPIException(f"Error fetching posts: {e}")
+            raise BaseAPIException(f"{POST_ERROR_FETCHING}: {e}")
 
     def resolve_posts_by_user(self, info, user_id):
         try:
             user = get_authenticated_user(info)
             if not user:
-                raise AuthenticationError("You are not authenticated")
+                raise AuthenticationError(AUTH_NOT_AUTHENTICATED)
 
             return Post.objects.filter(blog__user=user)
         except Exception as e:
-            raise BaseAPIException(f"Error fetching posts: {e}")
+            raise BaseAPIException(f"{POST_ERROR_FETCHING}: {e}")
 
     def resolve_posts_by_title(self, info, title):
         try:
             return Post.objects.filter(title__icontains=title)
         except Exception as e:
-            raise BaseAPIException(f"Error fetching posts: {e}")
+            raise BaseAPIException(f"{POST_ERROR_FETCHING}: {e}")
 
     
 
@@ -101,20 +136,20 @@ class CreateBlog(graphene.Mutation):
         try:
             user = get_authenticated_user(info)
             if not user:
-                raise AuthenticationError("You are not authenticated")
+                raise AuthenticationError(AUTH_NOT_AUTHENTICATED)
 
             if not title.strip():
-                raise BaseAPIException("Title is required")
+                raise BaseAPIException(BLOG_TITLE_REQUIRED)
             if not description.strip():
-                raise BaseAPIException("Description is required")
+                raise BaseAPIException(BLOG_DESCRIPTION_REQUIRED)
 
             blog = Blog.objects.create(title=title, description=description, user=user)
-            return CreateBlog(blog=blog, message="Blog created successfully", success=True)
+            return CreateBlog(blog=blog, message=BLOG_CREATED_SUCCESS, success=True)
 
         except (AuthenticationError, BaseAPIException) as e:
             raise e
         except Exception as e:
-            raise BaseAPIException(f"Error creating blog: {e}")
+            raise BaseAPIException(f"{BLOG_ERROR_CREATING}: {e}")
 
 
 class UpdateBlog(graphene.Mutation):
@@ -131,30 +166,30 @@ class UpdateBlog(graphene.Mutation):
         try:
             user = get_authenticated_user(info)
             if not user:
-                raise AuthenticationError("You are not authenticated")
+                raise AuthenticationError(AUTH_NOT_AUTHENTICATED)
 
             try:
                 blog = Blog.objects.get(id=id)
             except Blog.DoesNotExist:
-                raise NotFoundError("Blog not found")
+                raise NotFoundError(BLOG_NOT_FOUND)
 
             if not (is_superuser(user) or blog.user == user):
-                raise PermissionDeniedError("You are not allowed to update this blog")
+                raise PermissionDeniedError(BLOG_UPDATE_PERMISSION_DENIED)
 
             if not title.strip():
-                raise BaseAPIException("Title is required")
+                raise BaseAPIException(BLOG_TITLE_REQUIRED)
             if not description.strip():
-                raise BaseAPIException("Description is required")
+                raise BaseAPIException(BLOG_DESCRIPTION_REQUIRED)
 
             blog.title = title
             blog.description = description
             blog.save()
-            return UpdateBlog(blog=blog, message="Blog updated successfully", success=True)
+            return UpdateBlog(blog=blog, message=BLOG_UPDATED_SUCCESS, success=True)
 
         except (AuthenticationError, PermissionDeniedError, BaseAPIException) as e:
             raise e
         except Exception as e:
-            raise BaseAPIException(f"Error updating blog: {e}")
+            raise BaseAPIException(f"{BLOG_ERROR_UPDATING}: {e}")
 
 
 class DeleteBlog(graphene.Mutation):
@@ -168,23 +203,23 @@ class DeleteBlog(graphene.Mutation):
         try:
             user = get_authenticated_user(info)
             if not user:
-                raise AuthenticationError("You are not authenticated")
+                raise AuthenticationError(AUTH_NOT_AUTHENTICATED)
 
             try:
                 blog = Blog.objects.get(id=id)
             except Blog.DoesNotExist:
-                raise NotFoundError("Blog not found")
+                raise NotFoundError(BLOG_NOT_FOUND)
 
             if not (is_superuser(user) or blog.user == user):
-                raise PermissionDeniedError("You are not allowed to delete this blog")
+                raise PermissionDeniedError(BLOG_DELETE_PERMISSION_DENIED)
 
             blog.delete()
-            return DeleteBlog(message="Blog deleted successfully", success=True)
+            return DeleteBlog(message=BLOG_DELETED_SUCCESS, success=True)
 
         except (AuthenticationError, PermissionDeniedError, BaseAPIException) as e:
             raise e
         except Exception as e:
-            raise BaseAPIException(f"Error deleting blog: {e}")
+            raise BaseAPIException(f"{BLOG_ERROR_DELETING}: {e}")
 
 
 class CreatePost(graphene.Mutation):
@@ -201,25 +236,25 @@ class CreatePost(graphene.Mutation):
         try:
             user = get_authenticated_user(info)
             if not user:
-                raise AuthenticationError("You are not authenticated")
+                raise AuthenticationError(AUTH_NOT_AUTHENTICATED)
 
             try:
                 blog = Blog.objects.get(id=blog_id)
             except Blog.DoesNotExist:
-                raise NotFoundError("Blog not found")
+                raise NotFoundError(BLOG_NOT_FOUND)
 
             if not title.strip():
-                raise BaseAPIException("Title is required")
+                raise BaseAPIException(POST_TITLE_REQUIRED)
             if not content.strip():
-                raise BaseAPIException("Content is required")
+                raise BaseAPIException(POST_CONTENT_REQUIRED)
 
             post = Post.objects.create(blog=blog, title=title, content=content)
-            return CreatePost(post=post, message="Post created successfully", success=True)
+            return CreatePost(post=post, message=POST_CREATED_SUCCESS, success=True)
 
         except (AuthenticationError, BaseAPIException) as e:
             raise e
         except Exception as e:
-            raise BaseAPIException(f"Error creating post: {e}")
+            raise BaseAPIException(f"{POST_ERROR_CREATING}: {e}")
 
 
 class UpdatePost(graphene.Mutation):
@@ -236,30 +271,30 @@ class UpdatePost(graphene.Mutation):
         try:
             user = get_authenticated_user(info)
             if not user:
-                raise AuthenticationError("You are not authenticated")
+                raise AuthenticationError(AUTH_NOT_AUTHENTICATED)
 
             try:
                 post = Post.objects.get(id=id)
             except Post.DoesNotExist:
-                raise NotFoundError("Post not found")
+                raise NotFoundError(POST_NOT_FOUND)
 
             if not (is_superuser(user) or post.blog.user == user):
-                raise PermissionDeniedError("You are not allowed to update this post")
+                raise PermissionDeniedError(POST_UPDATE_PERMISSION_DENIED)
 
             if not title.strip():
-                raise BaseAPIException("Title is required")
+                raise BaseAPIException(POST_TITLE_REQUIRED)
             if not content.strip():
-                raise BaseAPIException("Content is required")
+                raise BaseAPIException(POST_CONTENT_REQUIRED)
 
             post.title = title
             post.content = content
             post.save()
-            return UpdatePost(post=post, message="Post updated successfully", success=True)
+            return UpdatePost(post=post, message=POST_UPDATED_SUCCESS, success=True)
 
         except (AuthenticationError, PermissionDeniedError, BaseAPIException) as e:
             raise e
         except Exception as e:
-            raise BaseAPIException(f"Error updating post: {e}")
+            raise BaseAPIException(f"{POST_ERROR_UPDATING}: {e}")
 
 
 class DeletePost(graphene.Mutation):
@@ -273,23 +308,23 @@ class DeletePost(graphene.Mutation):
         try:
             user = get_authenticated_user(info)
             if not user:
-                raise AuthenticationError("You are not authenticated")
+                raise AuthenticationError(AUTH_NOT_AUTHENTICATED)
 
             try:
                 post = Post.objects.get(id=id)
             except Post.DoesNotExist:
-                raise NotFoundError("Post not found")
+                raise NotFoundError(POST_NOT_FOUND)
 
             if not (is_superuser(user) or post.blog.user == user):
-                raise PermissionDeniedError("You are not allowed to delete this post")
+                raise PermissionDeniedError(POST_DELETE_PERMISSION_DENIED)
 
             post.delete()
-            return DeletePost(message="Post deleted successfully", success=True)
+            return DeletePost(message=POST_DELETED_SUCCESS, success=True)
 
         except (AuthenticationError, PermissionDeniedError, BaseAPIException) as e:
             raise e
         except Exception as e:
-            raise BaseAPIException(f"Error deleting post: {e}")
+            raise BaseAPIException(f"{POST_ERROR_DELETING}: {e}")
 
 
 class AddTagToPost(graphene.Mutation):
@@ -306,28 +341,28 @@ class AddTagToPost(graphene.Mutation):
         try:
             user = get_authenticated_user(info)
             if not user:
-                raise AuthenticationError("You are not authenticated")
+                raise AuthenticationError(AUTH_NOT_AUTHENTICATED)
 
             try:
                 post = Post.objects.get(id=post_id)
             except Post.DoesNotExist:
-                raise NotFoundError("Post not found")
+                raise NotFoundError(POST_NOT_FOUND)
 
             if not (is_superuser(user) or post.blog.user == user):
-                raise PermissionDeniedError("You are not allowed to modify this post")
+                raise PermissionDeniedError(POST_MODIFY_PERMISSION_DENIED)
 
             try:
                 tag = Tag.objects.get(id=tag_id)
             except Tag.DoesNotExist:
-                raise NotFoundError("Tag not found")
+                raise NotFoundError(TAG_NOT_FOUND)
 
             post.tags.add(tag)
-            return AddTagToPost(post=post, tag=tag, message="Tag added to post successfully", success=True)
+            return AddTagToPost(post=post, tag=tag, message=TAG_ADDED_TO_POST_SUCCESS, success=True)
 
         except (AuthenticationError, PermissionDeniedError, BaseAPIException) as e:
             raise e
         except Exception as e:
-            raise BaseAPIException(f"Error adding tag to post: {e}")
+            raise BaseAPIException(f"{TAG_ERROR_ADDING_TO_POST}: {e}")
 
 
 class RemoveTagFromPost(graphene.Mutation):
@@ -344,28 +379,28 @@ class RemoveTagFromPost(graphene.Mutation):
         try:
             user = get_authenticated_user(info)
             if not user:
-                raise AuthenticationError("You are not authenticated")
+                raise AuthenticationError(AUTH_NOT_AUTHENTICATED)
 
             try:
                 post = Post.objects.get(id=post_id)
             except Post.DoesNotExist:
-                raise NotFoundError("Post not found")
+                raise NotFoundError(POST_NOT_FOUND)
 
             if not (is_superuser(user) or post.blog.user == user):
-                raise PermissionDeniedError("You are not allowed to modify this post")
+                raise PermissionDeniedError(POST_MODIFY_PERMISSION_DENIED)
 
             try:
                 tag = Tag.objects.get(id=tag_id)
             except Tag.DoesNotExist:
-                raise NotFoundError("Tag not found")
+                raise NotFoundError(TAG_NOT_FOUND)
 
             post.tags.remove(tag)
-            return RemoveTagFromPost(post=post, tag=tag, message="Tag removed from post successfully", success=True)
+            return RemoveTagFromPost(post=post, tag=tag, message=TAG_REMOVED_FROM_POST_SUCCESS, success=True)
 
         except (AuthenticationError, PermissionDeniedError, BaseAPIException) as e:
             raise e
         except Exception as e:
-            raise BaseAPIException(f"Error removing tag from post: {e}")
+            raise BaseAPIException(f"{TAG_ERROR_REMOVING_FROM_POST}: {e}")
 
 class Mutation(graphene.ObjectType):
     create_blog = CreateBlog.Field()

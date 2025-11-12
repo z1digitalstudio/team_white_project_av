@@ -15,6 +15,26 @@ from user.exceptions import (
     NotFoundError,
 )
 from Core.graphql_types import UserType
+from user.constants import (
+    AUTH_NOT_AUTHENTICATED,
+    AUTH_INVALID_CREDENTIALS,
+    AUTH_LOGIN_SUCCESS,
+    AUTH_LOGOUT_SUCCESS,
+    USER_ALL_FIELDS_REQUIRED,
+    USER_PASSWORDS_DO_NOT_MATCH,
+    USER_USERNAME_ALREADY_EXISTS,
+    USER_EMAIL_ALREADY_EXISTS,
+    USER_PASSWORD_UPDATE_SUCCESS,
+    USER_NOT_FOUND,
+    USER_DELETE_PERMISSION_DENIED,
+    USER_ERROR_RETRIEVING,
+    USER_ERROR_RETRIEVING_BY_ID,
+    USER_ERROR_CREATING,
+    USER_ERROR_DURING_LOGIN,
+    USER_ERROR_DURING_LOGOUT,
+    USER_ERROR_DELETING,
+    USER_ERROR_UPDATING_PASSWORD,
+)
 
 
 class Query(graphene.ObjectType):
@@ -25,15 +45,15 @@ class Query(graphene.ObjectType):
         try:
             return User.objects.all()
         except Exception as e:
-            raise BaseAPIException(f"Error retrieving users: {e}")
+            raise BaseAPIException(f"{USER_ERROR_RETRIEVING}: {e}")
 
     def resolve_user_by_id(root, info, id):
         try:
             return User.objects.get(id=id)
         except User.DoesNotExist:
-            raise NotFoundError("User not found")
+            raise NotFoundError(USER_NOT_FOUND)
         except Exception as e:
-            raise BaseAPIException(f"Error retrieving user: {e}")
+            raise BaseAPIException(f"{USER_ERROR_RETRIEVING_BY_ID}: {e}")
 
 
 class CreateUser(graphene.Mutation):
@@ -49,16 +69,16 @@ class CreateUser(graphene.Mutation):
     def mutate(self, info, username, email, password, password_confirm):
         try:
             if not username or not email or not password or not password_confirm:
-                raise BaseAPIException("All fields are required")
+                raise BaseAPIException(USER_ALL_FIELDS_REQUIRED)
 
             if password != password_confirm:
-                raise BaseAPIException("Passwords do not match")
+                raise BaseAPIException(USER_PASSWORDS_DO_NOT_MATCH)
 
             if User.objects.filter(username=username).exists():
-                raise BaseAPIException("Username already exists")
+                raise BaseAPIException(USER_USERNAME_ALREADY_EXISTS)
 
             if User.objects.filter(email=email).exists():
-                raise BaseAPIException("Email already exists")
+                raise BaseAPIException(USER_EMAIL_ALREADY_EXISTS)
 
             user = User.objects.create_user(username=username, email=email, password=password)
             token = create_user_token(user)
@@ -67,7 +87,7 @@ class CreateUser(graphene.Mutation):
         except BaseAPIException as e:
             raise e
         except Exception as e:
-            raise BaseAPIException(f"Error creating user: {e}")
+            raise BaseAPIException(f"{USER_ERROR_CREATING}: {e}")
 
 
 class LoginUser(graphene.Mutation):
@@ -83,15 +103,15 @@ class LoginUser(graphene.Mutation):
         try:
             user = authenticate_user(username, password)
             if not user:
-                raise BaseAPIException("Invalid credentials")
+                raise BaseAPIException(AUTH_INVALID_CREDENTIALS)
 
             token = create_user_token(user)
-            return LoginUser(user=user, token=token, message="Logged in successfully")
+            return LoginUser(user=user, token=token, message=AUTH_LOGIN_SUCCESS)
 
         except BaseAPIException as e:
             raise e
         except Exception as e:
-            raise BaseAPIException(f"Error during login: {e}")
+            raise BaseAPIException(f"{USER_ERROR_DURING_LOGIN}: {e}")
 
 
 class LogoutUser(graphene.Mutation):
@@ -103,16 +123,16 @@ class LogoutUser(graphene.Mutation):
         try:
             user = get_authenticated_user(info)
             if not user or not user.is_authenticated:
-                raise BaseAPIException("You are not authenticated")
+                raise BaseAPIException(AUTH_NOT_AUTHENTICATED)
 
             delete_user_token(user)
             logout(info.context)
-            return LogoutUser(success=True, message="Logged out successfully", user=user)
+            return LogoutUser(success=True, message=AUTH_LOGOUT_SUCCESS, user=user)
 
         except InvalidCredentialsError as e:
             raise e
         except Exception as e:
-            raise BaseAPIException(f"Error during logout: {e}")
+            raise BaseAPIException(f"{USER_ERROR_DURING_LOGOUT}: {e}")
 
 
 class DeleteUser(graphene.Mutation):
@@ -125,23 +145,23 @@ class DeleteUser(graphene.Mutation):
         try:
             current_user = get_authenticated_user(info)
             if not current_user or not current_user.is_authenticated:
-                raise BaseAPIException("You are not authenticated")
+                raise BaseAPIException(AUTH_NOT_AUTHENTICATED)
 
             try:
                 user = User.objects.get(id=user_id)
             except User.DoesNotExist:
-                raise NotFoundError("User not found")
+                raise NotFoundError(USER_NOT_FOUND)
 
             if user.is_superuser or user.id == current_user.id:
                 user.delete()
                 return DeleteUser(user=user)
             else:
-                raise PermissionDeniedError("You are not allowed to delete this user")
+                raise PermissionDeniedError(USER_DELETE_PERMISSION_DENIED)
 
         except (AuthenticationError, PermissionDeniedError, InvalidCredentialsError) as e:
             raise e
         except Exception as e:
-            raise BaseAPIException(f"Error deleting user: {e}")
+            raise BaseAPIException(f"{USER_ERROR_DELETING}: {e}")
 
 
 class UpdatePassword(graphene.Mutation):
@@ -156,20 +176,20 @@ class UpdatePassword(graphene.Mutation):
     def mutate(self, info, new_password, confirm_password):
         try:
             if new_password != confirm_password:
-                raise InvalidCredentialsError("Passwords do not match")
+                raise InvalidCredentialsError(USER_PASSWORDS_DO_NOT_MATCH)
 
             user = get_authenticated_user(info)
             if not user or not user.is_authenticated:
-                raise AuthenticationError("You are not authenticated")
+                raise AuthenticationError(AUTH_NOT_AUTHENTICATED)
 
             user.set_password(new_password)
             user.save()
-            return UpdatePassword(user=user, message="Password updated successfully", success=True)
+            return UpdatePassword(user=user, message=USER_PASSWORD_UPDATE_SUCCESS, success=True)
 
         except (AuthenticationError, InvalidCredentialsError) as e:
             raise e
         except Exception as e:
-            raise BaseAPIException(f"Error updating password: {e}")
+            raise BaseAPIException(f"{USER_ERROR_UPDATING_PASSWORD}: {e}")
 
 
 class Mutation(graphene.ObjectType):
