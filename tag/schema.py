@@ -77,7 +77,7 @@ class Query(graphene.ObjectType):
 
     def resolve_tags_by_post_name(self, info, post_name):
         try:
-            post = Post.objects.get(name=post_name)
+            post = Post.objects.get(title=post_name)
             return post.tags.all()
         except Post.DoesNotExist:
             raise NotFoundError(TAG_POST_NOT_FOUND)
@@ -90,7 +90,7 @@ class Query(graphene.ObjectType):
 
     def resolve_tags_by_name_and_post_name(self, info, name, post_name):
         try:
-            post = Post.objects.get(name=post_name)
+            post = Post.objects.get(title=post_name)
             return Tag.objects.filter(name__icontains=name, posts=post)
         except Post.DoesNotExist:
             raise NotFoundError(TAG_POST_NOT_FOUND)
@@ -215,7 +215,7 @@ class AddTagToPost(graphene.Mutation):
             except (Post.DoesNotExist, Tag.DoesNotExist):
                 raise NotFoundError(TAG_POST_OR_TAG_NOT_FOUND)
 
-            if not (is_superuser(user) or post.user == user):
+            if not (is_superuser(user) or post.blog.user == user):
                 raise PermissionDeniedError(TAG_MODIFY_PERMISSION_DENIED)
 
             post.tags.add(tag)
@@ -254,7 +254,7 @@ class RemoveTagFromPost(graphene.Mutation):
             except (Post.DoesNotExist, Tag.DoesNotExist):
                 raise NotFoundError(TAG_POST_OR_TAG_NOT_FOUND)
 
-            if not (is_superuser(user) or post.user == user):
+            if not (is_superuser(user) or post.blog.user == user):
                 raise PermissionDeniedError(TAG_MODIFY_PERMISSION_DENIED)
 
             post.tags.remove(tag)
