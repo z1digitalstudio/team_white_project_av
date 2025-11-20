@@ -61,8 +61,10 @@ INSTALLED_APPS = [
     "tag",
     "drf_spectacular",
     "graphene_django",
-    "debug_toolbar",
 ]
+if DEBUG:
+    INSTALLED_APPS.append("debug_toolbar")
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -73,6 +75,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
+
+if DEBUG:
+    MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
 
 ROOT_URLCONF = "Core.urls"
 
@@ -254,4 +259,3 @@ if DEBUG:
         "127.0.0.1",
         "localhost",
     ]
-    MIDDLEWARE.insert(MIDDLEWARE.index("django.contrib.auth.middleware.AuthenticationMiddleware") + 1, "debug_toolbar.middleware.DebugToolbarMiddleware")
