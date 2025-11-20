@@ -112,5 +112,6 @@ class PostViewSet(
 
             qs = qs.filter(blog_id=blog_id_int)
 
-        return qs
+        qs = qs.select_related('blog', 'blog__user').prefetch_related('tags')
 
+        return qs
