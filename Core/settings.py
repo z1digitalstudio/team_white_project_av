@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "tag",
     "drf_spectacular",
     "graphene_django",
+    "debug_toolbar",
 ]
 
 MIDDLEWARE = [
@@ -100,6 +101,10 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "blog.exceptions.custom_exception_handler",
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    ]
 }
 
 WSGI_APPLICATION = "Core.wsgi.application"
@@ -243,3 +248,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 GRAPHENE = {
     "SCHEMA": "Core.schema.schema",
 }
+
+if DEBUG:
+    INTERNAL_IPS = [
+        "127.0.0.1",
+        "localhost",
+    ]
+    MIDDLEWARE.insert(MIDDLEWARE.index("django.contrib.auth.middleware.AuthenticationMiddleware") + 1, "debug_toolbar.middleware.DebugToolbarMiddleware")

@@ -10,14 +10,13 @@ from drf_spectacular.views import (
 )
 from graphene_django.views import GraphQLView
 from Core.schema import schema
-
+import debug_toolbar
 
 def root_view(request):
-    """Root endpoint that returns API information."""
     return JsonResponse({
         "status": "ok",
         "message": "CMS Server API",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "endpoints": {
             "admin": "/admin/",
             "api_docs": "/api/docs/",
@@ -52,3 +51,4 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += [path("__debug__/", include(debug_toolbar.urls))]

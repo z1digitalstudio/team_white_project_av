@@ -51,8 +51,13 @@ class BlogViewSet(
     queryset = Blog.objects.all()
     serializer_class = BlogSerializer
 
-    def perform_create(self, serializer):
+    def get_queryset(self):
+        return Blog.objects.select_related('user').all()
+
+
+    def perform_create(self, serializer):   
         serializer.save(user=self.request.user)
+
 
 
 @extend_schema_view(
