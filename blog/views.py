@@ -15,7 +15,7 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.exceptions import ValidationError
 from django.db import IntegrityError
 from .exceptions import BaseAPIException
-from .constants import BLOG_TITLE_ALREADY_EXISTS
+from .constants import USER_ALREADY_HAS_BLOG
 
 @extend_schema_view(
     list=extend_schema(
@@ -23,6 +23,7 @@ from .constants import BLOG_TITLE_ALREADY_EXISTS
         description="Obtiene una lista de todos los blogs disponibles. Los blogs son públicos para lectura.",
         tags=["Blogs"],
     ),
+    
     create=extend_schema(
         summary="Crear blog",
         description="Crea un nuevo blog para el usuario autenticado. Requiere autenticación.",
@@ -62,7 +63,7 @@ class BlogViewSet(
         try:
                 serializer.save(user=self.request.user)
         except IntegrityError:
-                raise BaseAPIException(detail=BLOG_TITLE_ALREADY_EXISTS)
+                raise BaseAPIException(detail=USER_ALREADY_HAS_BLOG)
 
 
 @extend_schema_view(

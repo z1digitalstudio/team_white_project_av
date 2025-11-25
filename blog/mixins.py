@@ -58,15 +58,22 @@ class BlogOwnerPermissionMixin:
         return [permission() for permission in permission_classes]
 
     def perform_update(self, serializer):
-        blog = self.get_object()
-        if blog.user != self.request.user and not self.request.user.is_superuser:
-            raise PermissionDenied("Only the owner of the blog can edit it")
-        serializer.save()
+        obj = self.get_object()
+        blog = obj.blog if hasattr(obj, 'blog') else obj
+        if blog.user == self.request.user or self.request.user.is_superuser:
+            serializer.save()
+            return
+
+        raise PermissionDenied("Only the owner of the blog can edit it")
 
     def perform_destroy(self, instance):
-        if instance.user != self.request.user and not self.request.user.is_superuser:
-            raise PermissionDenied("Only the owner of the blog can delete it")
-        instance.delete()
+        blog = instance.blog if hasattr(instance, 'blog') else instance
+        if blog.user == self.request.user or self.request.user.is_superuser:
+            instance.delete()
+            return
+
+        raise PermissionDenied("Only the owner of the blog can delete it")
+
 
 
 class PostOwnerQuerysetAdminMixin:
