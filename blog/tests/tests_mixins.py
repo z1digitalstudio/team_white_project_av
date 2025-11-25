@@ -156,13 +156,13 @@ class TestBlogOwnerPermissionMixin(APITestCase):
         mixin.request = Mock()
         mixin.request.user = self.user
 
-        instance = Mock()
-        instance.user = self.user
+        instance = PostFactory(blog=self.blog)
         instance.delete = Mock()
 
         mixin.perform_destroy(instance)
 
         instance.delete.assert_called_once()
+
 
     def test_perform_destroy_not_owner(self):
         mixin = BlogOwnerPermissionMixin()
@@ -170,8 +170,7 @@ class TestBlogOwnerPermissionMixin(APITestCase):
         mixin.request.user = self.other_user
         mixin.request.user.is_superuser = False
 
-        instance = Mock()
-        instance.user = self.user
+        instance = PostFactory(blog=self.blog)
 
         with self.assertRaises(PermissionDenied):
             mixin.perform_destroy(instance)

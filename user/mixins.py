@@ -3,7 +3,10 @@ from user.exceptions import InvalidCredentialsError
 
 
 class AuthenticationMixin:
-
+    """
+    This mixin is used to authenticate the user.
+    It is used in the viewset.
+    """
     def authenticate_user(self, username: str, password: str):
         user = authenticate_user(username, password)
         if not user:

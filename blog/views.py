@@ -13,6 +13,9 @@ from .mixins import (
 )
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.exceptions import ValidationError
+from django.db import IntegrityError
+from .exceptions import BaseAPIException
+from .constants import USER_ALREADY_HAS_BLOG
 
 @extend_schema_view(
     list=extend_schema(
@@ -20,6 +23,7 @@ from rest_framework.exceptions import ValidationError
         description="Obtiene una lista de todos los blogs disponibles. Los blogs son públicos para lectura.",
         tags=["Blogs"],
     ),
+    
     create=extend_schema(
         summary="Crear blog",
         description="Crea un nuevo blog para el usuario autenticado. Requiere autenticación.",
@@ -51,8 +55,15 @@ class BlogViewSet(
     queryset = Blog.objects.all()
     serializer_class = BlogSerializer
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+    def get_queryset(self):
+        return Blog.objects.select_related('user').all()
+
+
+    def perform_create(self, serializer):   
+        try:
+                serializer.save(user=self.request.user)
+        except IntegrityError:
+                raise BaseAPIException(detail=USER_ALREADY_HAS_BLOG)
 
 
 @extend_schema_view(
@@ -107,5 +118,6 @@ class PostViewSet(
 
             qs = qs.filter(blog_id=blog_id_int)
 
-        return qs
+        qs = qs.select_related('blog', 'blog__user').prefetch_related('tags')
 
+        return qs
