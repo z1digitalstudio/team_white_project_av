@@ -13,6 +13,7 @@ BLOG_DELETED_SUCCESS = "Blog deleted successfully"
 
 # Blog error messages
 BLOG_NOT_FOUND = "Blog not found"
+BLOG_TITLE_ALREADY_EXISTS = "Blog title already exists"
 BLOG_UPDATE_PERMISSION_DENIED = "You are not allowed to update this blog"
 BLOG_DELETE_PERMISSION_DENIED = "You are not allowed to delete this blog"
 BLOG_ERROR_FETCHING = "Error fetching blogs"

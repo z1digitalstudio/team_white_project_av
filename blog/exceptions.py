@@ -16,7 +16,7 @@ class BaseAPIException(APIException):
     def __init__(self, detail=None, code=None):
         self.detail = detail if detail is not None else self.default_detail
         self.code = code if code is not None else self.default_code
-        super().__init__()
+        super().__init__(detail=self.detail, code=self.code)
 
 
 class AuthenticationError(BaseAPIException):
