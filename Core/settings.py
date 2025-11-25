@@ -31,6 +31,12 @@ ALLOWED_HOSTS = [
     host.strip() for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,teamwhiteprojectav-production.up.railway.app").split(",")
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:4200",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
 CSRF_TRUSTED_ORIGINS = [
     "https://teamwhiteprojectav-production.up.railway.app",
     "https://*.railway.app",  
@@ -61,12 +67,14 @@ INSTALLED_APPS = [
     "tag",
     "drf_spectacular",
     "graphene_django",
+    "corsheaders",
 ]
 if DEBUG:
     INSTALLED_APPS.append("debug_toolbar")
 
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",

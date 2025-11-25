@@ -7,6 +7,10 @@ from .models import Blog
 
 
 class PostReadonlyFieldsMixin:
+    """
+    This mixin is used to limit the readonly fields to the blog field.
+    It is used in the admin panel.
+    """
     def get_readonly_fields(self, request, obj=None):
         ro = list(super().get_readonly_fields(request, obj))
         if not request.user.is_superuser and obj is not None and "blog" not in ro:
@@ -15,7 +19,10 @@ class PostReadonlyFieldsMixin:
 
 
 class PublicReadOnlyMixin:
-
+    """
+    This mixin is used to limit the public read only actions to the public.
+    It is used in the viewset.
+    """
     def get_permissions(self):
 
         if self.action == "list" or self.action == "retrieve":
@@ -26,6 +33,10 @@ class PublicReadOnlyMixin:
 
 
 class LimitBlogChoicesToOwnerMixin:
+    """
+    This mixin is used to limit the blog choices to the owner of the blog.
+    It is used in the admin panel and the viewset.
+    """
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         formfield = super().formfield_for_foreignkey(db_field, request, **kwargs)
         if db_field.name == "blog" and not request.user.is_superuser:
@@ -35,7 +46,10 @@ class LimitBlogChoicesToOwnerMixin:
 
 
 class BlogOwnerPermissionMixin:
-
+    """
+    This mixin is used to limit the blog choices to the owner of the blog.
+    It is used in the admin panel.
+    """
     def get_permissions(self):
         if self.action == "list" or self.action == "retrieve":
             permission_classes = [permissions.AllowAny]
@@ -56,6 +70,10 @@ class BlogOwnerPermissionMixin:
 
 
 class PostOwnerQuerysetAdminMixin:
+    """
+    This mixin is used to limit the post choices to the owner of the post.
+    It is used in the admin panel and the viewset.
+    """
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if not request.user.is_authenticated:
@@ -66,7 +84,10 @@ class PostOwnerQuerysetAdminMixin:
 
 
 class PostOwnerQuerysetViewSetMixin:
-
+    """
+    This mixin is used to limit the post choices to the owner of the post and the superuser.
+    It is used in the viewset.
+    """
     def get_queryset(self):
         qs = super().get_queryset()
         if not self.request.user.is_authenticated:
@@ -77,6 +98,10 @@ class PostOwnerQuerysetViewSetMixin:
 
 
 class PostEditorMixin:
+    """
+    This mixin is used to limit the post editing to the owner of the post and the superuser.
+    It is used in the admin panel.
+    """
     def save_model(self, request, obj, form, change):
         if request.user.is_superuser:
             return super().save_model(request, obj, form, change)

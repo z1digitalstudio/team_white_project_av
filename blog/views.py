@@ -13,6 +13,9 @@ from .mixins import (
 )
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.exceptions import ValidationError
+from django.db import IntegrityError
+from .exceptions import BaseAPIException
+from .constants import BLOG_TITLE_ALREADY_EXISTS
 
 @extend_schema_view(
     list=extend_schema(
@@ -56,8 +59,10 @@ class BlogViewSet(
 
 
     def perform_create(self, serializer):   
-        serializer.save(user=self.request.user)
-
+        try:
+                serializer.save(user=self.request.user)
+        except IntegrityError:
+                raise BaseAPIException(detail=BLOG_TITLE_ALREADY_EXISTS)
 
 
 @extend_schema_view(
