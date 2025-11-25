@@ -59,7 +59,7 @@ class BlogOwnerPermissionMixin:
 
     def perform_update(self, serializer):
         obj = self.get_object()
-        blog = obj.blog if hasattr(obj, 'blog') else obj
+        blog = getattr(obj, 'blog', obj)
         if blog.user == self.request.user or self.request.user.is_superuser:
             serializer.save()
             return
@@ -67,14 +67,11 @@ class BlogOwnerPermissionMixin:
         raise PermissionDenied("Only the owner of the blog can edit it")
 
     def perform_destroy(self, instance):
-        blog = instance.blog if hasattr(instance, 'blog') else instance
+        blog = getattr(instance, 'blog', instance)
         if blog.user == self.request.user or self.request.user.is_superuser:
             instance.delete()
             return
-
         raise PermissionDenied("Only the owner of the blog can delete it")
-
-
 
 class PostOwnerQuerysetAdminMixin:
     """
